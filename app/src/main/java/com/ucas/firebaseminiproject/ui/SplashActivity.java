@@ -16,15 +16,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.ucas.firebaseminiproject.R;
+import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.databinding.ActivitySplashBinding;
 
 public class SplashActivity extends AppCompatActivity {
     ActivitySplashBinding binding;
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
-    boolean isRemembered;
+    private AuthViewModel authViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,29 +32,26 @@ public class SplashActivity extends AppCompatActivity {
         binding = ActivitySplashBinding.inflate(getLayoutInflater());
         EdgeToEdge.enable(this);
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//            return insets;
+//        });
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        sharedPreferences = getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
+//        boolean isFirstRun = sharedPreferences.getBoolean(FIRST_RUN_KEY, true);
+//        if (isFirstRun) {
+//            //clear SharedPreferences on first run
+//            editor.clear().apply();
+//            //set first run to false
+//            editor.putBoolean(FIRST_RUN_KEY, false);
+//            editor.apply();
+//        }
 
-        boolean isFirstRun = sharedPreferences.getBoolean(FIRST_RUN_KEY, true);
-        if (isFirstRun) {
-            //clear SharedPreferences on first run
-            editor.clear().apply();
-            //set first run to false
-            editor.putBoolean(FIRST_RUN_KEY, false);
-            editor.apply();
-        }
-
-        isRemembered = sharedPreferences.getBoolean(IS_REMEMBERED_KEY, false);
 
         new Handler().postDelayed(() -> {
             Intent intent;
-            if (!isRemembered) {
+            if (!authViewModel.getRememberInfo(SplashActivity.this)) {
                 intent = new Intent(SplashActivity.this, LoginActivity.class);
             } else {
 //                if (studentId == -1) {

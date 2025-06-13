@@ -1,8 +1,13 @@
 package com.ucas.firebaseminiproject.data.repositories;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.EMAIL_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.IS_REMEMBERED_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.PASSWORD_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.SHARED_PREFERENCES_NAME;
 import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Tasks;
@@ -13,10 +18,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Map;
 
 public class AuthRepository {
+    //test if I can but here or I need to put in method
+
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-
-
     public void register(Map<String, Object> userData, OnCompleteListener<Void> listener) {
         String email = (String) userData.get(EMAIL_MAP_KEY);
         String password = (String) userData.get(PASSWORD_MAP_KEY);
@@ -43,5 +48,17 @@ public class AuthRepository {
 
     public void login(String email, String password, OnCompleteListener<AuthResult> listener) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(listener);
+    }
+
+    public void saveRememberInfo(Context context, Boolean isRememberMe) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(IS_REMEMBERED_KEY, isRememberMe);
+        editor.apply();
+    }
+
+    public boolean getRememberInfo(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(IS_REMEMBERED_KEY, false);
     }
 }
