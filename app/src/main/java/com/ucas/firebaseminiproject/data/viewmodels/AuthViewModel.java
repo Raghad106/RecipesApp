@@ -28,4 +28,8 @@ public class AuthViewModel extends ViewModel {
     public boolean getRememberInfo(Context context){
         return repository.getRememberInfo(context);
     }
+
+    public Map<String, String> getCurrentUserInfo(){
+        return repository.getCurrentUserInfo();
+    }
 }

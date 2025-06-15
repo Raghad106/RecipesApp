@@ -10,7 +10,9 @@ public interface Constance {
     String SHARED_PREFERENCES_NAME ="remember me storage";
 
     // Collections Name
-    String USERS_COLLECTION ="user collection";
+    String USERS_COLLECTION ="Users";
+    String CATEGORY_COLLECTION ="Categories";
+    String RECIPE_COLLECTION ="Recipes";
 
     // User Document's filed
     String EMAIL_MAP_KEY ="email";
@@ -19,6 +21,15 @@ public interface Constance {
     String COUNTRY_MAP_KEY ="country";
     String LINK_MAP_KEY ="link";
     String IMAGE_MAP_KEY ="image";
+
+    String CATEGORY_NAME = "Cat Name";
+
+    // Fragment Tags
+    String ADD_RECIPE_TAG = "new recipe";
+
+    // Method Tags
+    String ADD_CATEGORY_TAG = "add category";
+    String REMOVE_CATEGORY_TAG = "remove category";
 
     String CHANNEL_ID = "lesson_channel";
     String STUDENT_ID_KEY ="student id";

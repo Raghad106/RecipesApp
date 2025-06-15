@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:title="Recipe Book"
+                app:titleTextColor="@android:color/white" />
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/appBar"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add a new Recipe"
+                android:layout_marginTop="8dp"
+                android:textSize="24sp"
+                android:textColor="@color/orange_500"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:textStyle="bold"
+                />
+            <!-- Recipe Title -->
+            <EditText
+                android:id="@+id/etTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Recipe Title"
+                android:background="@drawable/rounded_border"
+                android:padding="12dp"
+                app:layout_constraintTop_toBottomOf="@id/tvTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="20dp"/>
+
+            <!-- Ingredients -->
+            <EditText
+                android:id="@+id/etIngredient"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Add Ingredient"
+                android:background="@drawable/rounded_border"
+                android:padding="12dp"
+                app:layout_constraintTop_toBottomOf="@id/etTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnAddIngredient"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"
+                />
+
+            <Button
+                android:id="@+id/btnAddIngredient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+"
+                app:layout_constraintTop_toTopOf="@id/etIngredient"
+                app:layout_constraintBottom_toBottomOf="@id/etIngredient"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- Dynamic Ingredient Container -->
+            <TextView
+                android:id="@+id/tvContainerIngredients"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/etIngredient"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/orange_500"/>
+
+            <!-- Steps -->
+            <EditText
+                android:id="@+id/etStep"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Add Step"
+                android:background="@drawable/rounded_border"
+                android:padding="12dp"
+                app:layout_constraintTop_toBottomOf="@id/tvContainerIngredients"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnAddStep"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnAddStep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+"
+                app:layout_constraintTop_toTopOf="@id/etStep"
+                app:layout_constraintBottom_toBottomOf="@id/etStep"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- Dynamic Step Container -->
+            <TextView
+                android:id="@+id/tvContainerSteps"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/etStep"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/orange_500"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCategories"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/tvContainerSteps"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+            <!-- Category Input -->
+            <EditText
+                android:id="@+id/etCategory"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Add Category"
+                android:background="@drawable/rounded_border"
+                android:padding="12dp"
+                app:layout_constraintTop_toBottomOf="@id/rvCategories"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnAddCategory"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnAddCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+"
+                app:layout_constraintTop_toTopOf="@id/etCategory"
+                app:layout_constraintBottom_toBottomOf="@id/etCategory"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- Categories RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSelectedCategories"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/etCategory"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Video URL -->
+            <EditText
+                android:id="@+id/etVideoUrl"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Video URL"
+                android:background="@drawable/rounded_border"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/rvSelectedCategories"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/btnSubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Recipe"
+                app:layout_constraintTop_toBottomOf="@id/etVideoUrl"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="20dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

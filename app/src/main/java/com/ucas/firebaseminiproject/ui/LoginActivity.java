@@ -8,12 +8,8 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.ucas.firebaseminiproject.R;
 import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.databinding.ActivityLoginBinding;
 import com.ucas.firebaseminiproject.utilities.ViewsCustomListeners;
@@ -57,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
                 authViewModel.loginUser(binding.etLoginEmail.getText().toString(), binding.etLoginPassword.getText().toString(), task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(this, "login Successfully", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         // Go to home or login
                     } else {
                         Log.d("Login Error", task.getException().getMessage());

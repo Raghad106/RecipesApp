@@ -1,6 +1,5 @@
 package com.ucas.firebaseminiproject.ui;
 
-import static com.ucas.firebaseminiproject.utilities.Constance.FIRST_RUN_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.IS_REMEMBERED_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.SHARED_PREFERENCES_NAME;
 
@@ -9,16 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.ucas.firebaseminiproject.R;
 import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.databinding.ActivitySplashBinding;
 
@@ -38,7 +32,6 @@ public class SplashActivity extends AppCompatActivity {
 //            return insets;
 //        });
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-
 //        boolean isFirstRun = sharedPreferences.getBoolean(FIRST_RUN_KEY, true);
 //        if (isFirstRun) {
 //            //clear SharedPreferences on first run
@@ -57,7 +50,7 @@ public class SplashActivity extends AppCompatActivity {
 //                if (studentId == -1) {
 //                    intent = new Intent(SplashActivity.this, LoginActivity.class);
 //                } else {
-                    intent = new Intent(SplashActivity.this, HomeActivity.class);
+                    intent = new Intent(SplashActivity.this, MainActivity.class);
 //                    intent.putExtra(STUDENT_ID_KEY, studentId);
 //                    Log.d("student id", studentId+"");
                // }
