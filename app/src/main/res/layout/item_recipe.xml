@@ -11,7 +11,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:paddingBottom="12dp"
+        >
 
         <!-- Recipe Image -->
         <ImageView
@@ -29,7 +30,7 @@
             android:id="@+id/btnPlayVideo"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/bg_circle_orange"
+            android:background="@drawable/bg_category_pill"
             android:padding="10dp"
             android:src="@drawable/ic_play"
             android:contentDescription="Play"
@@ -44,7 +45,7 @@
             android:id="@+id/btnSave"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_circle_orange"
+            android:background="@drawable/bg_category_pill"
             android:src="@drawable/ic_save"
             android:contentDescription="Save"
             android:elevation="4dp"
@@ -57,11 +58,12 @@
             android:id="@+id/ivUserAvatar"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_account"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
             android:scaleType="centerCrop"
-            app:layout_constraintTop_toBottomOf="@id/ivRecipeImage"
+            android:src="@drawable/ic_account"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
 
         <!-- Username -->
         <TextView
@@ -82,10 +84,10 @@
             android:id="@+id/ivLike"
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:layout_marginEnd="4dp"
             android:src="@drawable/ic_like"
-            app:layout_constraintTop_toTopOf="@id/ivUserAvatar"
             app:layout_constraintEnd_toStartOf="@id/tvLikesCount"
-            android:layout_marginEnd="4dp"/>
+            app:layout_constraintTop_toTopOf="@+id/tvDescription" />
 
         <!-- Like Count -->
         <TextView
@@ -93,6 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0"
+            android:layout_marginEnd="8dp"
             android:textColor="@color/black"
             android:textSize="14sp"
             android:layout_marginStart="4dp"
@@ -109,12 +112,14 @@
             android:layout_marginEnd="8dp"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
-            android:background="@drawable/bg_category_pill"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_circle_orange"
             android:text="Dessert"
             android:textColor="@color/orange_700"
             android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@id/ivUserAvatar"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="12dp"/>
 
         <TextView
             android:id="@+id/tvCategory2"
@@ -123,7 +128,7 @@
             android:layout_marginStart="4dp"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
-            android:background="@drawable/bg_category_pill"
+            android:background="@drawable/bg_circle_orange"
             android:text="Quick"
             android:textColor="@color/orange_700"
             android:textSize="12sp"
@@ -139,7 +144,7 @@
             android:layout_marginStart="4dp"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
-            android:background="@drawable/bg_category_pill"
+            android:background="@drawable/bg_circle_orange"
             android:text="Vegan"
             android:textColor="@color/orange_700"
             android:textSize="12sp"
@@ -151,18 +156,16 @@
         <!-- Description -->
         <TextView
             android:id="@+id/tvDescription"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="This is a delicious recipe you can try at home with only a few ingredients..."
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:maxLines="3"
-            android:ellipsize="end"
-            app:layout_constraintTop_toBottomOf="@id/tvCategory1"
+            android:layout_marginStart="8dp"
+            android:text="This is a delicious "
+            android:textColor="@color/orange_700"
+            android:textSize="20sp"
+            android:layout_marginTop="12dp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/ivRecipeImage" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

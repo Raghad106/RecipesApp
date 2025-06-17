@@ -2,31 +2,36 @@ package com.ucas.firebaseminiproject.ui;
 
 import static android.view.View.VISIBLE;
 import static android.widget.Toast.LENGTH_SHORT;
-
+import static com.ucas.firebaseminiproject.data.uplodeImage.CloudinaryHelper.uploadImageToCloudinary;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_NAME;
+import static com.ucas.firebaseminiproject.utilities.Constance.HOME_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declareRecyclerView;
 
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.ucas.firebaseminiproject.data.models.Recipe;
+import com.ucas.firebaseminiproject.data.uplodeImage.CloudinaryHelper;
 import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentAddRecipeBinding;
 import com.ucas.firebaseminiproject.ui.adapters.CategoryAdapter;
-import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
-import com.ucas.firebaseminiproject.utilities.OnRecipeListener;
+import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,25 +43,43 @@ import java.util.Map;
  * Use the {@link AddRecipeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AddRecipeFragment extends Fragment implements OnRecipeListener.OnCategoryListener{
+public class AddRecipeFragment extends Fragment implements OnItemListener.OnCategoryListener{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    List<String> selectedCategories = new ArrayList<>();
-    CategoryAdapter adapter;
+    private List<String> selectedCategories = new ArrayList<>();
+    private CategoryAdapter adapter;
+    private RecipeViewModel recipeViewModel;
+    private AuthViewModel authViewModel;
+    private FragmentAddRecipeBinding binding;
+    private Uri selectedImageUri;
+    private OnItemListener.OnFragmentListener listener;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
-    private RecipeViewModel recipeViewModel;
-    private AuthViewModel authViewModel;
-    private FragmentAddRecipeBinding binding;
+
+
+    private final ActivityResultLauncher<String> galleryLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null) {
+                    selectedImageUri = uri;
+                    binding.ivRecipeImage.setImageURI(uri); // Preview selected image
+                }
+            });
+
 
     public AddRecipeFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        listener = (OnItemListener.OnFragmentListener) context;
     }
 
     /**
@@ -93,31 +116,25 @@ public class AddRecipeFragment extends Fragment implements OnRecipeListener.OnCa
         recipeViewModel = new ViewModelProvider(requireActivity()).get(RecipeViewModel.class);
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
+        // I used map to add category
         Map<String, String> newCategoryMap = new HashMap<>();
-        List<String> newCategoriesToCreate = new ArrayList<>();
 
-        recipeViewModel.getAllCategories(new OnFirebaseLoadedListener() {
-            @Override
-            public void onCategoriesLoaded(List<String> categories) {
-                adapter = new CategoryAdapter(categories, selectedCategories, AddRecipeFragment.this, true);
-                declareRecyclerView(adapter, binding.rvCategories, true, 0);
-            }
-            @Override
-            public void onRecipeLoaded(List<Recipe> recipes) {
-                // Not needed here
-            }
+        // View all Categories
+        recipeViewModel.getAllCategories(categories -> {
+            adapter = new CategoryAdapter(categories, selectedCategories, AddRecipeFragment.this, true);
+            declareRecyclerView(requireActivity() ,adapter, binding.rvCategories, true);
+
         });
 
+        // Add a new category to selected categories not to categories collection
         binding.btnAddCategory.setOnClickListener(v -> {
             String newCategory = binding.etCategory.getText().toString().trim();
 
             if (!newCategory.isEmpty() && selectedCategories.size() < 3 && !selectedCategories.contains(newCategory.toLowerCase())) {
-                // Maybe I will delete it
-                newCategoriesToCreate.add(newCategory.toLowerCase());// Save for later push
                 selectedCategories.add(newCategory);
 
                 CategoryAdapter adapter2 = new CategoryAdapter(selectedCategories, selectedCategories, this, false);
-                declareRecyclerView(adapter2, binding.rvSelectedCategories, true, 0);
+                declareRecyclerView(requireActivity(),adapter2, binding.rvSelectedCategories, true);
 
                 binding.etCategory.setText("");
             } else {
@@ -125,6 +142,7 @@ public class AddRecipeFragment extends Fragment implements OnRecipeListener.OnCa
             }
         });
 
+        // Add new Ingredient
         binding.btnAddIngredient.setOnClickListener(view -> {
             binding.tvContainerIngredients.setVisibility(VISIBLE);
             String newIngredient = binding.etIngredient.getText().toString();
@@ -133,6 +151,7 @@ public class AddRecipeFragment extends Fragment implements OnRecipeListener.OnCa
             binding.etIngredient.append(binding.tvContainerIngredients.getText().toString() +"\n");
         });
 
+        // Add a new step
         binding.btnAddStep.setOnClickListener(view -> {
             binding.tvContainerSteps.setVisibility(VISIBLE);
             String newStep = binding.etStep.getText().toString();
@@ -141,39 +160,58 @@ public class AddRecipeFragment extends Fragment implements OnRecipeListener.OnCa
             binding.etStep.append(binding.tvContainerSteps.getText().toString() + "\n");
         });
 
+        // Add Image
+        binding.ivRecipeImage.setOnClickListener(view -> {
+            galleryLauncher.launch("image/*");
+        });
+
+        // Add new generated categories to categories collection in firebase and then
+        // add a new recipe to global recipes collection and recipes collection in category document
         binding.btnSubmit.setOnClickListener(view -> {
+            // Sure nothing empty or null
             if (!binding.tvContainerSteps.getText().toString().isEmpty() &&
                     !binding.tvContainerIngredients.getText().toString().isEmpty() &&
                     !binding.etTitle.getText().toString().isEmpty() &&
                     !binding.etVideoUrl.getText().toString().isEmpty()&&
                     !selectedCategories.isEmpty() && selectedCategories != null
             ){
+                // To Prevent user from create more than one
+                binding.btnSubmit.setEnabled(false);
+                // I used pojo class to add recipe
                 Recipe recipe = new Recipe();
                 recipe.setCategories(selectedCategories);
                 recipe.setTitle(binding.etTitle.getText().toString());
                 recipe.setSteps(binding.tvContainerSteps.getText().toString());
                 recipe.setIngredients(binding.tvContainerIngredients.getText().toString());
                 recipe.setVideoUrl(binding.etVideoUrl.getText().toString());
-                recipe.setPublisherName(authViewModel.getCurrentUserInfo().get(NAME_MAP_KEY));
-                recipe.setPublisherImage(null);
                 recipe.setImageUrl(null);
-                recipe.setLikedBy(new ArrayList<>());
                 recipe.setLikesCount(0);
 
                 for (String category: selectedCategories) {
                     newCategoryMap.put(CATEGORY_NAME, category);
                 }
-                recipeViewModel.createCategory(newCategoryMap, task -> {
-                    if (task.isSuccessful()){
-                        recipeViewModel.createRecipe(selectedCategories, recipe, task1 -> {
-                            if (task.isSuccessful())
-                                Toast.makeText(requireContext(), "added done", LENGTH_SHORT).show();
-                            else
-                                Toast.makeText(requireContext(), "recipe not add", LENGTH_SHORT).show();
+
+                // Get publisher Info
+                authViewModel.getCurrentUserInfo(userMap -> {
+                    recipe.setPublisherId(userMap.get(ID_MAP_KEY));
+
+                    if (selectedImageUri != null) {
+                        uploadImageToCloudinary(requireContext(), selectedImageUri, new CloudinaryHelper.OnUploadCompleteListener() {
+                            @Override
+                            public void onSuccess(String imageUrl) {
+                                recipe.setImageUrl(imageUrl);
+                                saveRecipe(recipe, newCategoryMap); // proceed after image upload
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                Toast.makeText(requireContext(), "Image upload failed: " + error, LENGTH_SHORT).show();
+                            }
                         });
+                    } else {
+                        recipe.setImageUrl(null);
+                        saveRecipe(recipe, newCategoryMap);
                     }
-                    else
-                        Toast.makeText(requireContext(), "category not add", LENGTH_SHORT).show();
                 });
             }
             else
@@ -183,20 +221,41 @@ public class AddRecipeFragment extends Fragment implements OnRecipeListener.OnCa
         return binding.getRoot();
     }
 
-    void declareRecyclerView(RecyclerView.Adapter adapter, RecyclerView recyclerView, boolean isLinear, int numOfSpan){
-        recyclerView.setAdapter(adapter);
-        if (isLinear)
-            recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false));
-        else
-            recyclerView.setLayoutManager(new GridLayoutManager(requireActivity(),numOfSpan));
+
+    private void saveRecipe(Recipe recipe, Map<String, String> newCategoryMap) {
+        // Create the new category first, then save the recipe
+        Log.d("DEBUG", "Creating new category...");
+        recipeViewModel.createCategory(newCategoryMap, categoryTask -> {
+            if (categoryTask.isSuccessful()) {
+                Log.d("DEBUG", "Category created successfully.");
+
+                recipeViewModel.createRecipe(selectedCategories, recipe, recipeTask -> {
+                    if (recipeTask.isSuccessful()) {
+                        Log.d("DEBUG", "Recipe saved successfully.");
+                        Toast.makeText(requireContext(), "Recipe added successfully", LENGTH_SHORT).show();
+                        listener.onNavigateFragment(HOME_TAG);
+                    } else {
+                        Log.e("DEBUG", "Failed to save recipe after category creation.");
+                        Toast.makeText(requireContext(), "Failed to add recipe", LENGTH_SHORT).show();
+                    }
+                });
+
+            } else {
+                Log.e("DEBUG", "Failed to create category.");
+                Toast.makeText(requireContext(), "Failed to create category", LENGTH_SHORT).show();
+            }
+        });
+
     }
+
+
 
     @Override
     public void onCategoryClicked() {
         selectedCategories = adapter.getSelectedCategories();
 
         CategoryAdapter adapter2 = new CategoryAdapter(selectedCategories,selectedCategories, this, false);
-        declareRecyclerView(adapter2, binding.rvSelectedCategories, true, 0);
+        declareRecyclerView(requireActivity(), adapter2, binding.rvSelectedCategories, true);
         adapter.notifyDataSetChanged();
 
         Log.d("categories size", String.valueOf(selectedCategories.size()));

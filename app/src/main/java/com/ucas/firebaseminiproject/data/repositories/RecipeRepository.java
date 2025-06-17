@@ -2,50 +2,70 @@ package com.ucas.firebaseminiproject.data.repositories;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_NAME;
+import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_COLLECTION;
+import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_ID;
+import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
+
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class RecipeRepository {
-    FirebaseFirestore firestore =FirebaseFirestore.getInstance();
+    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
-    public void createCategory(Map<String, String> category, OnCompleteListener<Void> listener){
-        // I use the name as document Id to grant the users will not create same category
-        firestore.collection(CATEGORY_COLLECTION).document(category.get(CATEGORY_NAME).toLowerCase()).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                if (!task.getResult().exists())
-                    firestore.collection(CATEGORY_COLLECTION).document(category.get(CATEGORY_NAME).toLowerCase()).set(category).addOnCompleteListener(listener);
+    public void createCategory(Map<String, String> category, OnCompleteListener<Void> listener) {
+        String categoryName = category.get(CATEGORY_NAME).toLowerCase();
+
+        firestore.collection(CATEGORY_COLLECTION).document(categoryName).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (!task.getResult().exists()) {
+                    // Category doesn't exist, so create it
+                    firestore.collection(CATEGORY_COLLECTION).document(categoryName).set(category)
+                            .addOnCompleteListener(listener);
+                } else {
+                    // Category already exists — still trigger the listener with a "success"
+                    listener.onComplete(Tasks.forResult(null));
+                }
+            } else {
+                // Forward the failure
+                listener.onComplete(Tasks.forException(task.getException()));
             }
         });
     }
-    public void getAllCategories(OnFirebaseLoadedListener listener){
+
+
+    public void getAllCategories(OnFirebaseLoadedListener.OnCategoriesLoaded listener) {
         // IF I return it directly it will bake null because firebase work in worker thread so it take time, that way I use listeners
         // Implement the listener's interface in fragment
         List<String> categories = new ArrayList<>();
         firestore.collection(CATEGORY_COLLECTION).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                for (DocumentSnapshot doc: task.getResult()) {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot doc : task.getResult()) {
                     categories.add(doc.getId().toLowerCase());
                 }
                 listener.onCategoriesLoaded(categories);
-            }else
+            } else
                 listener.onCategoriesLoaded(new ArrayList<>());
         });
     }
 
-    //If I call OnCompleteListener inside loop that's mean it will return the result according to loops time
-    public void myCreateRecipe(List<String> categories,Recipe recipe, OnCompleteListener<Void> listener){
+    public void myCreateRecipe(List<String> categories, Recipe recipe, OnCompleteListener<Void> listener) {
         // Limit to at most 3 categories
         List<String> limitedCategories = categories.size() > 3
                 ? categories.subList(0, 3)
@@ -70,83 +90,136 @@ public class RecipeRepository {
     }
 
     public void createRecipe(List<String> categories, Recipe recipe, OnCompleteListener<Void> listener) {
-        // Limit to at most 3 categories
+        // Limit categories to max 3
         List<String> limitedCategories = categories.size() > 3
                 ? categories.subList(0, 3)
                 : categories;
 
-        // Collect all write tasks
+        // Set initial values
+        recipe.setLikesCount(0);
+
+        // Generate and set a unique recipe ID
+        String recipeId = firestore.collection(RECIPE_COLLECTION).document().getId();
+        recipe.setRecipeId(recipeId);
+
         List<Task<Void>> tasks = new ArrayList<>();
 
-        for (String categoryId : limitedCategories) {
-            Task<Void> task = firestore.collection(CATEGORY_COLLECTION)
-                    .document(categoryId.toLowerCase()) // Convert to uppercase if needed
-                    .collection(RECIPE_COLLECTION)
-                    .document() // Generate new document ID
-                    .set(recipe); // Save recipe
+        // Save recipe in global collection
+        Task<Void> globalTask = firestore.collection(RECIPE_COLLECTION)
+                .document(recipeId)
+                .set(recipe);
+        tasks.add(globalTask);
 
-            tasks.add(task);
+        // Save recipeId in each category's recipeIds array
+        for (String categoryId : limitedCategories) {
+            Map<String, Object> data = new HashMap<>();
+            data.put(RECIPE_ID, FieldValue.arrayUnion(recipeId));
+
+            Task<Void> categoryTask = firestore.collection(CATEGORY_COLLECTION)
+                    .document(categoryId.toLowerCase())
+                    .set(data, SetOptions.merge());  // Safe even if doc doesn't exist
+            tasks.add(categoryTask);
         }
 
         // Wait for all tasks to complete
-        Tasks.whenAllComplete(tasks)
-                .addOnCompleteListener(task -> {
-                    boolean allSuccessful = true;
-                    for (Task<?> t : tasks) {
-                        if (!t.isSuccessful()) {
-                            allSuccessful = false;
-                            break;
-                        }
-                    }
-
-                    if (allSuccessful) {
-                        listener.onComplete(Tasks.forResult(null)); // Success
-                    } else {
-                        // You can also pass a custom exception if needed
-                        listener.onComplete(Tasks.forException(new Exception("One or more tasks failed.")));
-                    }
-                });
-    }
-
-
-    public void getAllRecipes(OnFirebaseLoadedListener listener){
-        List<Recipe> recipes = new ArrayList<>();
-        firestore.collection(CATEGORY_COLLECTION).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                List<Task<QuerySnapshot>> tasks = new ArrayList<>();
-                for (DocumentSnapshot doc: task.getResult()){
-                    String categoryId = doc.getId();
-                    tasks.add(firestore.collection(CATEGORY_COLLECTION).document(categoryId).collection(RECIPE_COLLECTION).get());
+        Tasks.whenAllComplete(tasks).addOnCompleteListener(task -> {
+            boolean allSuccessful = true;
+            for (Task<?> t : tasks) {
+                if (!t.isSuccessful()) {
+                    allSuccessful = false;
+                    break;
                 }
-                Tasks.whenAllSuccess(tasks).addOnSuccessListener(results -> {
-                    for (Object resultObj : results) {
-                        QuerySnapshot snapshot = (QuerySnapshot) resultObj;
-                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                            Recipe recipe = doc.toObject(Recipe.class);
-                            if (recipe != null) {
-                                recipes.add(recipe);
-                            }
-                        }
-                    }
-                    listener.onRecipeLoaded(recipes);
-                }).addOnFailureListener(e -> {
-                    listener.onRecipeLoaded(new ArrayList<>()); // Return empty list on failure
-                });
+            }
 
+            if (allSuccessful) {
+                listener.onComplete(Tasks.forResult(null));
             } else {
-                listener.onRecipeLoaded(new ArrayList<>()); // Return empty list on failure
+                listener.onComplete(Tasks.forException(new Exception("One or more tasks failed.")));
             }
         });
     }
 
-    public void getRecipesByCategoryName(String categoryId,OnFirebaseLoadedListener listener){
+    public void getAllRecipes(OnFirebaseLoadedListener.OnRecipeLoaded listener) {
         List<Recipe> recipes = new ArrayList<>();
-        firestore.collection(CATEGORY_COLLECTION).document(categoryId.toUpperCase()).collection(RECIPE_COLLECTION).get().addOnCompleteListener(task -> {
+
+        firestore.collection(RECIPE_COLLECTION)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Task<DocumentSnapshot>> userTasks = new ArrayList<>();
+                        List<Recipe> tempRecipes = new ArrayList<>();
+
+                        for (DocumentSnapshot doc : task.getResult()) {
+                            Recipe recipe = doc.toObject(Recipe.class);
+                            if (recipe != null) {
+                                tempRecipes.add(recipe);
+                                Task<DocumentSnapshot> userTask = firestore.collection(USERS_COLLECTION)
+                                        .document(recipe.getPublisherId())
+                                        .get();
+                                userTasks.add(userTask);
+                            }
+                        }
+
+                        Tasks.whenAllSuccess(userTasks).addOnSuccessListener(results -> {
+                            for (int i = 0; i < results.size(); i++) {
+                                DocumentSnapshot userDoc = (DocumentSnapshot) results.get(i);
+                                Recipe recipe = tempRecipes.get(i);
+                                recipe.setPublisherName(userDoc.getString(NAME_MAP_KEY));
+                                recipe.setPublisherImage(userDoc.getString(IMAGE_MAP_KEY)); // ← you wrote setPublisherName again
+                                recipes.add(recipe);
+                            }
+                            listener.onRecipeLoaded(recipes);
+                        }).addOnFailureListener(e -> {
+                            listener.onRecipeLoaded(new ArrayList<>());
+                        });
+
+                    } else {
+                        listener.onRecipeLoaded(new ArrayList<>());
+                    }
+                });
+    }
+
+    public void getRecipesByCategoryName(String categoryId,OnFirebaseLoadedListener.OnRecipeLoaded listener){
+        List<Recipe> recipes = new ArrayList<>();
+        firestore.collection(CATEGORY_COLLECTION).document(categoryId.toLowerCase()).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
-                for (Recipe recipe: task.getResult().toObjects(Recipe.class)){
-                    recipes.add(recipe);
+                List<String> recipeIds = (List<String>) task.getResult().get(RECIPE_ID);
+
+                if (recipeIds == null || recipeIds.isEmpty()) {
+                    listener.onRecipeLoaded(new ArrayList<>());
+                    return;
                 }
-                listener.onRecipeLoaded(recipes);
+                List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+                List<Recipe> tempRecipes = new ArrayList<>();
+                for (String recipeId : recipeIds) {
+                    tasks.add(firestore.collection(RECIPE_COLLECTION).document(recipeId).get());
+                }
+                Tasks.whenAllSuccess(tasks).addOnSuccessListener(results -> {
+                    List<Task<DocumentSnapshot>> userTasks = new ArrayList<>();
+                    for (Object result : results) {
+                        DocumentSnapshot doc = (DocumentSnapshot) result;
+                        Recipe recipe = doc.toObject(Recipe.class);
+                        if (recipe != null) {
+                            tempRecipes.add(recipe);
+
+                            Task<DocumentSnapshot> oneUerTask = firestore.collection(USERS_COLLECTION).document(recipe.getPublisherId()).get();
+                            userTasks.add(oneUerTask);
+                        }
+                    }
+                    Tasks.whenAllSuccess(userTasks).addOnSuccessListener(userResults -> {
+                        for (int i = 0; i < userResults.size(); i++) {
+                            DocumentSnapshot userDoc = (DocumentSnapshot) userResults.get(i);
+                            Recipe recipe = tempRecipes.get(i);
+                            recipe.setPublisherName(userDoc.getString(NAME_MAP_KEY));
+                            recipe.setPublisherImage(userDoc.getString(IMAGE_MAP_KEY)); // Make sure this is a real method
+                            recipes.add(recipe);
+                        }
+                        listener.onRecipeLoaded(recipes);
+                    });
+                }).addOnFailureListener(e -> {
+                    listener.onRecipeLoaded(new ArrayList<>());
+                    Log.e("Firestore", "Error fetching recipes by category", e);
+                });
             }
             else {
                 listener.onRecipeLoaded(new ArrayList<>());

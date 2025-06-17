@@ -1,6 +1,7 @@
 package com.ucas.firebaseminiproject.ui;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.ADD_RECIPE_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.HOME_TAG;
 
 import android.os.Bundle;
 
@@ -10,11 +11,9 @@ import androidx.fragment.app.Fragment;
 
 import com.ucas.firebaseminiproject.R;
 import com.ucas.firebaseminiproject.databinding.ActivityMainBinding;
-import com.ucas.firebaseminiproject.utilities.OnRecipeListener;
+import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
-import java.util.List;
-
-public class MainActivity extends AppCompatActivity implements OnRecipeListener {
+public class MainActivity extends AppCompatActivity implements OnItemListener.OnFragmentListener {
     ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,15 +46,6 @@ public class MainActivity extends AppCompatActivity implements OnRecipeListener 
                 .commit();
     }
 
-    @Override
-    public boolean onLikeClicked(String recipeId, String userId) {
-        return false;
-    }
-
-    @Override
-    public boolean onSaveClicked(String recipeId, String userId) {
-        return false;
-    }
 
 
 
@@ -63,5 +53,7 @@ public class MainActivity extends AppCompatActivity implements OnRecipeListener 
     public void onNavigateFragment(String tag) {
         if (tag.equals(ADD_RECIPE_TAG))
             navigateFragment(new AddRecipeFragment());
+        if (tag.equals(HOME_TAG))
+            navigateFragment(new HomeFragment());
     }
 }

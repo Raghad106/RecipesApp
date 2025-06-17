@@ -1,20 +1,26 @@
 package com.ucas.firebaseminiproject.ui;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.ADD_RECIPE_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
 
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ucas.firebaseminiproject.R;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentHomeBinding;
-import com.ucas.firebaseminiproject.utilities.OnRecipeListener;
+import com.ucas.firebaseminiproject.ui.adapters.FragmentAdapter;
+import com.ucas.firebaseminiproject.utilities.OnItemListener;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -31,7 +37,10 @@ public class HomeFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private OnRecipeListener listener;
+    private OnItemListener.OnFragmentListener listener;
+    private RecipeViewModel recipeViewModel;
+    private ArrayList<String> tabs = new ArrayList<>();
+    private ArrayList<Fragment> fragments = new ArrayList<>();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -40,7 +49,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        listener = (OnRecipeListener) context;
+        listener = (OnItemListener.OnFragmentListener) context;
     }
 
     /**
@@ -74,9 +83,29 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         FragmentHomeBinding binding = FragmentHomeBinding.inflate(inflater, container, false);
+        recipeViewModel = new ViewModelProvider(requireActivity()).get(RecipeViewModel.class);
+        tabs.add("ALL");
+        fragments.add(RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, "all"));
+
+        recipeViewModel.getAllCategories(categories -> {
+            for (String category: categories) {
+                tabs.add(category);
+                fragments.add(RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, category.toLowerCase()));
+            }
+            if (tabs.size() == fragments.size()) {
+                FragmentAdapter adapter = new FragmentAdapter(requireActivity(), fragments);
+                binding.vpRecipes.setAdapter(adapter);
+
+                new TabLayoutMediator(binding.tlCategories, binding.vpRecipes, (tab, position) -> {
+                    tab.setText(tabs.get(position));
+                }).attach();
+            }
+        });
+
         binding.fab.setOnClickListener(view -> {
             listener.onNavigateFragment(ADD_RECIPE_TAG);
         });
         return binding.getRoot();
     }
+
 }

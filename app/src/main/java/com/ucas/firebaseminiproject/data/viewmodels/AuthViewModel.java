@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.AuthResult;
 import com.ucas.firebaseminiproject.data.repositories.AuthRepository;
+import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
 
 import java.util.Map;
 
@@ -29,7 +30,11 @@ public class AuthViewModel extends ViewModel {
         return repository.getRememberInfo(context);
     }
 
-    public Map<String, String> getCurrentUserInfo(){
-        return repository.getCurrentUserInfo();
+    public void getCurrentUserInfo(OnFirebaseLoadedListener.OnUserInfoLoadedListener listener){
+        repository.getCurrentUserInfo(listener);
+    }
+
+    public void getUserInfoById(String userId, OnFirebaseLoadedListener.OnUserInfoLoadedListener listener){
+        repository.getUserInfoById(userId, listener);
     }
 }

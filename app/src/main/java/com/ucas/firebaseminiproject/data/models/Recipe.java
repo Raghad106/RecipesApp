@@ -6,6 +6,7 @@ public class Recipe {
     private String recipeId;
     private String imageUrl;
     private String videoUrl;
+    private String publisherId;
     private String publisherName;
     private String publisherImage;
     private boolean isSaved;
@@ -14,7 +15,7 @@ public class Recipe {
     private String title;
     private String steps;
     private String Ingredients;
-    private List<String> likedBy;
+
 
     public Recipe() {
         // Required empty constructor for Firebase
@@ -104,14 +105,6 @@ public class Recipe {
         this.title = title;
     }
 
-    public List<String> getLikedBy() {
-        return likedBy;
-    }
-
-    public void setLikedBy(List<String> likedBy) {
-        this.likedBy = likedBy;
-    }
-
     public String getRecipeId() {
         return recipeId;
     }
@@ -134,5 +127,13 @@ public class Recipe {
 
     public void setIngredients(String ingredients) {
         Ingredients = ingredients;
+    }
+
+    public String getPublisherId() {
+        return publisherId;
+    }
+
+    public void setPublisherId(String publisherId) {
+        this.publisherId = publisherId;
     }
 }

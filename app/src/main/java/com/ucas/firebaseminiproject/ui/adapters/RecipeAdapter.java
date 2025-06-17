@@ -1,7 +1,9 @@
 package com.ucas.firebaseminiproject.ui.adapters;
 
+import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
+
 import android.graphics.Color;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -11,21 +13,28 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
 import com.ucas.firebaseminiproject.databinding.ItemRecipeBinding;
 import com.ucas.firebaseminiproject.data.models.Recipe;
-import com.ucas.firebaseminiproject.utilities.OnRecipeListener;
+import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
 import java.util.List;
+import java.util.Map;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHolder> {
     List<Recipe> recipes;
-    OnRecipeListener listener;
-    private String currentUserId;
+    OnItemListener.OnRecipeListener listener;
+    Map<String, String> user;
 
-    public RecipeAdapter(OnRecipeListener listener, List<Recipe> recipes, String currentUserId) {
+    public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipes, Map<String, String> user) {
         this.listener = listener;
         this.recipes = recipes;
-        this.currentUserId = currentUserId;
+        this.user = user;
+    }
+
+    public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipes) {
+        this.listener = listener;
+        this.recipes = recipes;
     }
 
     @NonNull
@@ -40,12 +49,13 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
         int pos = i;
         Recipe recipe = recipes.get(pos);
         recipeHolder.username.setText(recipe.getPublisherName());
-        recipeHolder.description.setText(recipe.getTitle());
+        recipeHolder.description.setText(recipe.getTitle().toUpperCase());
         recipeHolder.likesCounts.setText(String.valueOf(recipe.getLikesCount()));
-        if (recipe.getPublisherImage() != null)
-            recipeHolder.accountImage.setImageURI(Uri.parse(recipe.getPublisherImage()));
-        if (recipe.getImageUrl() != null)
-            recipeHolder.recipeImage.setImageURI(Uri.parse(recipe.getImageUrl()));
+        if (recipe.getPublisherImage() != null && !recipe.getPublisherImage().isEmpty())
+            Picasso.get().load(recipe.getPublisherImage()).into(recipeHolder.accountImage);
+
+        if (recipe.getImageUrl() != null && !recipe.getImageUrl().isEmpty())
+            Picasso.get().load(recipe.getImageUrl()).into(recipeHolder.recipeImage);
 
         if (recipe.getCategories().size() == 1){
             recipeHolder.category1.setText(recipe.getCategories().get(0));
@@ -61,22 +71,22 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
             recipeHolder.category3.setVisibility(ViewGroup.VISIBLE);
         }
 
-        if (listener.onLikeClicked(recipe.getRecipeId(), currentUserId))
+        if (listener.onLikeClicked(recipe.getRecipeId(), recipe.getPublisherId()))
             recipeHolder.likeIcon.setColorFilter(Color.parseColor("#FB912C"));
         else
-            recipeHolder.likeIcon.setColorFilter(Color.parseColor("8D8D8DFF"));
+           // recipeHolder.likeIcon.setColorFilter(Color.parseColor("#8D8D8D"));
 
-        if (listener.onSaveClicked(recipe.getRecipeId(), currentUserId))
+        if (listener.onSaveClicked(recipe.getRecipeId(), recipe.getPublisherId()))
             recipeHolder.saveIcon.setColorFilter(Color.parseColor("#FB912C"));
         else
-            recipeHolder.saveIcon.setColorFilter(Color.parseColor("8D8D8DFF"));
+           // recipeHolder.saveIcon.setColorFilter(Color.parseColor("8D8D8DFF"));
 
         recipeHolder.likeIcon.setOnClickListener(view -> {
-            listener.onLikeClicked(recipe.getRecipeId(), currentUserId);
+            listener.onLikeClicked(recipe.getRecipeId(), recipe.getPublisherId());
         });
 
         recipeHolder.saveIcon.setOnClickListener(view -> {
-            listener.onSaveClicked(recipe.getRecipeId(), currentUserId);
+            listener.onSaveClicked(recipe.getRecipeId(), recipe.getPublisherId());
         });
     }
 

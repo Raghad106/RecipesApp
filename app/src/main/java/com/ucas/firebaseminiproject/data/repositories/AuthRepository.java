@@ -1,6 +1,8 @@
 package com.ucas.firebaseminiproject.data.repositories;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.EMAIL_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.IS_REMEMBERED_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.PASSWORD_MAP_KEY;
@@ -16,6 +18,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +28,7 @@ public class AuthRepository {
 
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
     public void register(Map<String, Object> userData, OnCompleteListener<Void> listener) {
         String email = (String) userData.get(EMAIL_MAP_KEY);
         String password = (String) userData.get(PASSWORD_MAP_KEY);
@@ -65,22 +69,47 @@ public class AuthRepository {
         return prefs.getBoolean(IS_REMEMBERED_KEY, false);
     }
 
-    public Map<String, String> getCurrentUserInfo() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    public void getCurrentUserInfo(OnFirebaseLoadedListener.OnUserInfoLoadedListener listener) {
+        FirebaseUser user = auth.getCurrentUser();
         Map<String, String> userInfo = new HashMap<>();
 
         if (user != null) {
-            userInfo.put("uid", user.getUid());
-
-            // You can get the display name (if it's set)
-            String name = user.getDisplayName();
-            if (name != null) {
-                userInfo.put(NAME_MAP_KEY, name);
-            } else {
-                userInfo.put(NAME_MAP_KEY, "Unknown");
-            }
+            firestore.collection(USERS_COLLECTION).document(user.getUid())
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            userInfo.put(ID_MAP_KEY, user.getUid());
+                            String name = task.getResult().getString(NAME_MAP_KEY);
+                            String userImage = task.getResult().getString(IMAGE_MAP_KEY);
+                            userInfo.put(NAME_MAP_KEY, name != null ? name : "Unknown");
+                            userInfo.put(IMAGE_MAP_KEY, userImage != null ? userImage : "");
+                            listener.onUserInfoLoaded(userInfo);
+                        }
+                    });
         }
-
-        return userInfo;
     }
+
+    public void getUserInfoById(String userId, OnFirebaseLoadedListener.OnUserInfoLoadedListener listener) {
+        Map<String, String> userInfo = new HashMap<>();
+
+        if (userId != null && !userId.isEmpty()) {
+            firestore.collection(USERS_COLLECTION).document(userId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            userInfo.put(ID_MAP_KEY, userId);
+                            String name = task.getResult().getString(NAME_MAP_KEY);
+                            String userImage = task.getResult().getString(IMAGE_MAP_KEY);
+                            userInfo.put(NAME_MAP_KEY, name != null ? name : "Unknown");
+                            userInfo.put(IMAGE_MAP_KEY, userImage != null ? userImage : "");
+                            listener.onUserInfoLoaded(userInfo);
+                        } else {
+                            listener.onUserInfoLoaded(new HashMap<>()); // Return empty map on failure
+                        }
+                    });
+        } else {
+            listener.onUserInfoLoaded(new HashMap<>()); // Return empty map if userId is invalid
+        }
+    }
+
 }

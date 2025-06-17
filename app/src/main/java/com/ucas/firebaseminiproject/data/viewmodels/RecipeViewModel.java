@@ -16,7 +16,7 @@ public class RecipeViewModel extends ViewModel {
     public void createCategory(Map<String, String> category, OnCompleteListener<Void> listener){
         repository.createCategory(category, listener);
     }
-    public void getAllCategories(OnFirebaseLoadedListener listener){
+    public void getAllCategories(OnFirebaseLoadedListener.OnCategoriesLoaded listener){
         repository.getAllCategories(listener);
     }
 
@@ -24,11 +24,13 @@ public class RecipeViewModel extends ViewModel {
         repository.createRecipe(categories, recipe, listener);
     }
 
-    public void getAllRecipes(OnFirebaseLoadedListener listener) {
+    public void getAllRecipes(OnFirebaseLoadedListener.OnRecipeLoaded listener) {
         repository.getAllRecipes(listener);
     }
 
-    public void getRecipesByCategoryName(String categoryId,OnFirebaseLoadedListener listener){
+    public void getRecipesByCategoryName(String categoryId,OnFirebaseLoadedListener.OnRecipeLoaded listener){
         repository.getRecipesByCategoryName(categoryId, listener);
     }
+
+
 }

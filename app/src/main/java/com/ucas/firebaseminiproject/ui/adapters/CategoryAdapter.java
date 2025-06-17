@@ -1,33 +1,28 @@
 package com.ucas.firebaseminiproject.ui.adapters;
 
-import static com.ucas.firebaseminiproject.utilities.Constance.ADD_CATEGORY_TAG;
-import static com.ucas.firebaseminiproject.utilities.Constance.REMOVE_CATEGORY_TAG;
-
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ucas.firebaseminiproject.R;
 import com.ucas.firebaseminiproject.databinding.ItemCategoryBinding;
-import com.ucas.firebaseminiproject.utilities.OnRecipeListener;
+import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryHolder> {
     private List<String> categories;
     private List<String> selectedCategories = new ArrayList<>();
-    private OnRecipeListener.OnCategoryListener listener;
+    private OnItemListener.OnCategoryListener listener;
     private boolean isSelectionMode; // true = first list (select), false = second list (remove)
 
-    public CategoryAdapter(List<String> categories, List<String> selectedCategories, OnRecipeListener.OnCategoryListener listener, boolean isSelectionMode) {
+    public CategoryAdapter(List<String> categories, List<String> selectedCategories, OnItemListener.OnCategoryListener listener, boolean isSelectionMode) {
         this.categories = categories;
         this.selectedCategories = selectedCategories;
         this.listener = listener;

@@ -13,8 +13,10 @@ public interface Constance {
     String USERS_COLLECTION ="Users";
     String CATEGORY_COLLECTION ="Categories";
     String RECIPE_COLLECTION ="Recipes";
+    String LIKED_BY_COLLECTION ="Likes";
 
     // User Document's filed
+    String ID_MAP_KEY ="uid";
     String EMAIL_MAP_KEY ="email";
     String PASSWORD_MAP_KEY ="password";
     String NAME_MAP_KEY ="name";
@@ -23,9 +25,11 @@ public interface Constance {
     String IMAGE_MAP_KEY ="image";
 
     String CATEGORY_NAME = "Cat Name";
+    String RECIPE_ID = "Recipe Ids";
 
     // Fragment Tags
-    String ADD_RECIPE_TAG = "new recipe";
+    String ADD_RECIPE_TAG = "New Recipe Fragment";
+    String HOME_TAG = "Home Fragment";
 
     // Method Tags
     String ADD_CATEGORY_TAG = "add category";

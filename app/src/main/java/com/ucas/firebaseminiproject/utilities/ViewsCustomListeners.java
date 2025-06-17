@@ -10,6 +10,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -64,4 +67,13 @@ public class ViewsCustomListeners {
         return ContextCompat.checkSelfPermission(context, CAMERA_PERMISSION) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(context, STORAGE_PERMISSION) == PackageManager.PERMISSION_GRANTED;
     }
+
+    public static void declareRecyclerView(Context context, RecyclerView.Adapter adapter, RecyclerView recyclerView, boolean isLinear){
+        recyclerView.setAdapter(adapter);
+        if (isLinear)
+            recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        else
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+    }
+
 }
