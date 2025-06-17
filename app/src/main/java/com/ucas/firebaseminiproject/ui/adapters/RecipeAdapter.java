@@ -1,8 +1,5 @@
 package com.ucas.firebaseminiproject.ui.adapters;
 
-import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
-import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
-
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -11,31 +8,30 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
-import com.ucas.firebaseminiproject.databinding.ItemRecipeBinding;
 import com.ucas.firebaseminiproject.data.models.Recipe;
+import com.ucas.firebaseminiproject.databinding.ItemRecipeBinding;
 import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
 import java.util.List;
-import java.util.Map;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHolder> {
     List<Recipe> recipes;
     OnItemListener.OnRecipeListener listener;
-    Map<String, String> user;
-
-    public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipes, Map<String, String> user) {
-        this.listener = listener;
-        this.recipes = recipes;
-        this.user = user;
-    }
 
     public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipes) {
         this.listener = listener;
         this.recipes = recipes;
     }
+
+    public void updateList(List<Recipe> newList) {
+        this.recipes = newList;
+        notifyDataSetChanged();
+    }
+
 
     @NonNull
     @Override
@@ -78,7 +74,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
 
         if (listener.onSaveClicked(recipe.getRecipeId(), recipe.getPublisherId()))
             recipeHolder.saveIcon.setColorFilter(Color.parseColor("#FB912C"));
-        else
+        //else
            // recipeHolder.saveIcon.setColorFilter(Color.parseColor("8D8D8DFF"));
 
         recipeHolder.likeIcon.setOnClickListener(view -> {
@@ -88,6 +84,14 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
         recipeHolder.saveIcon.setOnClickListener(view -> {
             listener.onSaveClicked(recipe.getRecipeId(), recipe.getPublisherId());
         });
+
+        recipeHolder.playIcon.setOnClickListener(view -> {
+            listener.onVideoClicked(recipe.getVideoUrl());
+        });
+
+        recipeHolder.layout.setOnClickListener(view -> {
+            listener.onLayoutClicked(recipe.getRecipeId(), recipe.getPublisherId());
+        });
     }
 
     @Override
@@ -95,8 +99,10 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
         return recipes.size();
     }
 
+
     public class RecipeHolder extends RecyclerView.ViewHolder {
         ImageButton playIcon, saveIcon;
+        CardView layout;
         ImageView likeIcon, accountImage, recipeImage;
         TextView username, description, category1, category2, category3, likesCounts;
         public RecipeHolder(@NonNull ItemRecipeBinding binding) {
@@ -112,6 +118,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
             category2 = binding.tvCategory2;
             category3 = binding.tvCategory3;
             likesCounts = binding.tvLikesCount;
+            layout = binding.layout;
         }
     }
 }

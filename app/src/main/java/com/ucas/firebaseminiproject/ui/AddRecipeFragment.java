@@ -6,8 +6,6 @@ import static com.ucas.firebaseminiproject.data.uplodeImage.CloudinaryHelper.upl
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_NAME;
 import static com.ucas.firebaseminiproject.utilities.Constance.HOME_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
-import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
-import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declareRecyclerView;
 
 import android.content.Context;
@@ -233,7 +231,7 @@ public class AddRecipeFragment extends Fragment implements OnItemListener.OnCate
                     if (recipeTask.isSuccessful()) {
                         Log.d("DEBUG", "Recipe saved successfully.");
                         Toast.makeText(requireContext(), "Recipe added successfully", LENGTH_SHORT).show();
-                        listener.onNavigateFragment(HOME_TAG);
+                        listener.onNavigateFragments(HOME_TAG);
                     } else {
                         Log.e("DEBUG", "Failed to save recipe after category creation.");
                         Toast.makeText(requireContext(), "Failed to add recipe", LENGTH_SHORT).show();

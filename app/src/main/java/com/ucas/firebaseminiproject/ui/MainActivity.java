@@ -1,9 +1,12 @@
 package com.ucas.firebaseminiproject.ui;
 
+import static android.view.View.GONE;
 import static com.ucas.firebaseminiproject.utilities.Constance.ADD_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.HOME_TAG;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(R.layout.activity_main);
+        setContentView(binding.getRoot());
 
         //show Home fragment bu default
         getSupportFragmentManager().beginTransaction()
@@ -46,14 +49,18 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
                 .commit();
     }
 
-
-
-
     @Override
-    public void onNavigateFragment(String tag) {
+    public void onNavigateFragments(String tag) {
         if (tag.equals(ADD_RECIPE_TAG))
             navigateFragment(new AddRecipeFragment());
         if (tag.equals(HOME_TAG))
             navigateFragment(new HomeFragment());
+    }
+
+    @Override
+    public void onNavigateRecipeDetailsFragment(String recipeId, String publisherId) {
+        if (recipeId != null && publisherId != null){
+            navigateFragment(RecipeDetailsFragment.newInstance(recipeId, publisherId));
+        }
     }
 }

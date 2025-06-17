@@ -41,10 +41,10 @@ public class SplashActivity extends AppCompatActivity {
 //            editor.apply();
 //        }
 
-        SharedPreferences prefs = getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(IS_REMEMBERED_KEY,false);
-        editor.apply();
+//        SharedPreferences prefs = getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = prefs.edit();
+//        editor.putBoolean(IS_REMEMBERED_KEY,false);
+//        editor.apply();
 
         new Handler().postDelayed(() -> {
             Intent intent;

@@ -103,6 +103,7 @@
             android:layout_height="wrap_content"
             android:text="Remember me"
             android:layout_marginTop="8dp"
+            android:backgroundTint="@color/orange_700"
             app:layout_constraintTop_toBottomOf="@id/frameLayout"
             app:layout_constraintStart_toStartOf="parent"/>
 

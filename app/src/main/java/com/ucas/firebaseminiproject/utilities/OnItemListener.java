@@ -5,11 +5,13 @@ public interface OnItemListener {
      interface OnRecipeListener{
           boolean onLikeClicked(String recipeId, String userId);
           boolean onSaveClicked(String recipeId, String userId);
-          boolean onVideoClicked(String videoLink);
+          void onLayoutClicked(String recipeId, String userId);
+          void onVideoClicked(String videoLink);
      }
 
      interface OnFragmentListener{
-          void onNavigateFragment(String tag);
+          void onNavigateFragments(String tag);
+          void onNavigateRecipeDetailsFragment(String recipeId, String publisherId);
      }
 
      public interface OnCategoryListener{

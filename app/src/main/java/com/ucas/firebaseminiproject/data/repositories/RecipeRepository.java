@@ -16,7 +16,6 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
@@ -62,30 +61,6 @@ public class RecipeRepository {
                 listener.onCategoriesLoaded(categories);
             } else
                 listener.onCategoriesLoaded(new ArrayList<>());
-        });
-    }
-
-    public void myCreateRecipe(List<String> categories, Recipe recipe, OnCompleteListener<Void> listener) {
-        // Limit to at most 3 categories
-        List<String> limitedCategories = categories.size() > 3
-                ? categories.subList(0, 3)
-                : categories;
-
-        // Collect all tasks into a list
-        List<Task<Void>> tasks = new ArrayList<>();
-
-        for (String documentId : limitedCategories) {
-            Task<Void> task = firestore.collection(CATEGORY_COLLECTION)
-                    .document(documentId.toUpperCase())
-                    .collection(RECIPE_COLLECTION)
-                    .document()
-                    .set(recipe);
-            tasks.add(task); // Add each task to the list
-        }
-
-        // Wait until all tasks complete before calling your listener
-        Tasks.whenAllComplete(tasks).addOnCompleteListener(task -> {
-            listener.onComplete(Tasks.forResult(null)); // Triggers listener with Void
         });
     }
 
@@ -139,7 +114,7 @@ public class RecipeRepository {
         });
     }
 
-    public void getAllRecipes(OnFirebaseLoadedListener.OnRecipeLoaded listener) {
+    public void getAllRecipes(OnFirebaseLoadedListener.OnRecipesLoaded listener) {
         List<Recipe> recipes = new ArrayList<>();
 
         firestore.collection(RECIPE_COLLECTION)
@@ -179,7 +154,7 @@ public class RecipeRepository {
                 });
     }
 
-    public void getRecipesByCategoryName(String categoryId,OnFirebaseLoadedListener.OnRecipeLoaded listener){
+    public void getRecipesByCategoryName(String categoryId, OnFirebaseLoadedListener.OnRecipesLoaded listener){
         List<Recipe> recipes = new ArrayList<>();
         firestore.collection(CATEGORY_COLLECTION).document(categoryId.toLowerCase()).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
@@ -223,6 +198,23 @@ public class RecipeRepository {
             }
             else {
                 listener.onRecipeLoaded(new ArrayList<>());
+            }
+        });
+    }
+
+    public void getRecipeByRecipeId(String recipeId, String userId, OnFirebaseLoadedListener.OnRecipeLoaded listener){
+        firestore.collection(RECIPE_COLLECTION).document(recipeId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                Recipe recipe = task.getResult().toObject(Recipe.class);
+                firestore.collection(USERS_COLLECTION).document(userId).get().addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()){
+                        if (recipe != null){
+                            recipe.setPublisherName(task1.getResult().getString(NAME_MAP_KEY));
+                            recipe.setPublisherImage(task1.getResult().getString(IMAGE_MAP_KEY));
+                            listener.onRecipeLoaded(recipe);
+                        }
+                    }
+                });
             }
         });
     }

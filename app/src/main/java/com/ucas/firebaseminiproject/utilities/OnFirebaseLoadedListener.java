@@ -9,8 +9,11 @@ public interface OnFirebaseLoadedListener {
     interface OnCategoriesLoaded{
         void onCategoriesLoaded(List<String> categories);
     }
-    interface OnRecipeLoaded{
+    interface OnRecipesLoaded {
         void onRecipeLoaded(List<Recipe> recipes);
+    }
+    interface OnRecipeLoaded {
+        void onRecipeLoaded(Recipe recipe);
     }
     interface OnUserInfoLoadedListener{
         void onUserInfoLoaded(Map<String, String> userInfo);
