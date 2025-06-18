@@ -48,7 +48,6 @@ public class RecipeRepository {
         });
     }
 
-
     public void getAllCategories(OnFirebaseLoadedListener.OnCategoriesLoaded listener) {
         // IF I return it directly it will bake null because firebase work in worker thread so it take time, that way I use listeners
         // Implement the listener's interface in fragment
@@ -94,6 +93,57 @@ public class RecipeRepository {
                     .document(categoryId.toLowerCase())
                     .set(data, SetOptions.merge());  // Safe even if doc doesn't exist
             tasks.add(categoryTask);
+        }
+
+        // Wait for all tasks to complete
+        Tasks.whenAllComplete(tasks).addOnCompleteListener(task -> {
+            boolean allSuccessful = true;
+            for (Task<?> t : tasks) {
+                if (!t.isSuccessful()) {
+                    allSuccessful = false;
+                    break;
+                }
+            }
+
+            if (allSuccessful) {
+                listener.onComplete(Tasks.forResult(null));
+            } else {
+                listener.onComplete(Tasks.forException(new Exception("One or more tasks failed.")));
+            }
+        });
+    }
+
+    public void editRecipe(List<String> oldCategories, List<String> categories, Recipe recipe, OnCompleteListener<Void> listener) {
+        List<String> limitedCategories = categories.size() > 3
+                ? categories.subList(0, 3)
+                : categories;
+        List<Task<Void>> tasks = new ArrayList<>();
+        Task<Void> globalTask = firestore.collection(RECIPE_COLLECTION)
+                .document(recipe.getRecipeId())
+                .set(recipe, SetOptions.merge());
+        tasks.add(globalTask);
+
+        for (String categoryId : limitedCategories) {
+            Map<String, Object> data = new HashMap<>();
+            data.put(RECIPE_ID, FieldValue.arrayUnion(recipe.getRecipeId()));
+
+            Task<Void> categoryTask = firestore.collection(CATEGORY_COLLECTION)
+                    .document(categoryId.toLowerCase())
+                    .set(data, SetOptions.merge());  // Safe even if doc doesn't exist
+            tasks.add(categoryTask);
+        }
+
+        // Remove recipeId from removed categories
+        for (String oldCat : oldCategories) {
+            if (!limitedCategories.contains(oldCat)) {
+                Map<String, Object> removeData = new HashMap<>();
+                removeData.put(RECIPE_ID, FieldValue.arrayRemove(recipe.getRecipeId()));
+
+                Task<Void> removeTask = firestore.collection(CATEGORY_COLLECTION)
+                        .document(oldCat.toLowerCase())
+                        .set(removeData, SetOptions.merge());
+                tasks.add(removeTask);
+            }
         }
 
         // Wait for all tasks to complete

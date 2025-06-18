@@ -37,7 +37,7 @@
             <ImageView
                 android:id="@+id/ivRecipeImage"
                 android:layout_width="0dp"
-                android:layout_height="350dp"
+                android:layout_height="320dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/sample_recipe"
                 app:layout_constraintTop_toTopOf="parent"
@@ -141,8 +141,8 @@
                 <!-- Avatar -->
                 <ImageView
                     android:id="@+id/ivUserAvatar"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_marginTop="12dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_account"

@@ -1,18 +1,18 @@
 package com.ucas.firebaseminiproject.ui;
 
-import static android.view.View.GONE;
 import static com.ucas.firebaseminiproject.utilities.Constance.ADD_RECIPE_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.EDIT_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.HOME_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.MY_RECIPE_TAG;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.ucas.firebaseminiproject.R;
+import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.databinding.ActivityMainBinding;
 import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
@@ -35,7 +35,9 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
             if (item.getItemId() == R.id.home) {
                 navigateFragment(new HomeFragment());
             } else if (item.getItemId() == R.id.account) {
+                navigateFragment(new ProfileFragment());
             } else if (item.getItemId() == R.id.myRecipe) {
+                navigateFragment(RecyclerViewFragment.newInstance(MY_RECIPE_TAG));
             }
             return true;
         });
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
     @Override
     public void onNavigateFragments(String tag) {
         if (tag.equals(ADD_RECIPE_TAG))
-            navigateFragment(new AddRecipeFragment());
+            navigateFragment(AddAndEditRecipeFragment.newInstance(ADD_RECIPE_TAG));
         if (tag.equals(HOME_TAG))
             navigateFragment(new HomeFragment());
     }
@@ -62,5 +64,11 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
         if (recipeId != null && publisherId != null){
             navigateFragment(RecipeDetailsFragment.newInstance(recipeId, publisherId));
         }
+    }
+
+    @Override
+    public void onNavigateEditRecipeDetailsFragment(String tag, Recipe recipe) {
+        if (tag.equals(EDIT_RECIPE_TAG))
+            navigateFragment(AddAndEditRecipeFragment.newInstance(tag, recipe));
     }
 }

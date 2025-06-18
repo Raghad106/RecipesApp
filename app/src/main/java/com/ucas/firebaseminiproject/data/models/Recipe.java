@@ -1,8 +1,11 @@
 package com.ucas.firebaseminiproject.data.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
-public class Recipe {
+public class Recipe implements Parcelable {
     private String recipeId;
     private String imageUrl;
     private String videoUrl;
@@ -40,6 +43,54 @@ public class Recipe {
         this.categories = categories;
         this.title = description;
     }
+
+    protected Recipe(Parcel in) {
+        recipeId = in.readString();
+        imageUrl = in.readString();
+        videoUrl = in.readString();
+        publisherId = in.readString();
+        publisherName = in.readString();
+        publisherImage = in.readString();
+        isSaved = in.readByte() != 0;
+        likesCount = in.readInt();
+        categories = in.createStringArrayList();
+        title = in.readString();
+        steps = in.readString();
+        Ingredients = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(recipeId);
+        dest.writeString(imageUrl);
+        dest.writeString(videoUrl);
+        dest.writeString(publisherId);
+        dest.writeString(publisherName);
+        dest.writeString(publisherImage);
+        dest.writeByte((byte) (isSaved ? 1 : 0));
+        dest.writeInt(likesCount);
+        dest.writeStringList(categories);
+        dest.writeString(title);
+        dest.writeString(steps);
+        dest.writeString(Ingredients);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Recipe> CREATOR = new Creator<Recipe>() {
+        @Override
+        public Recipe createFromParcel(Parcel in) {
+            return new Recipe(in);
+        }
+
+        @Override
+        public Recipe[] newArray(int size) {
+            return new Recipe[size];
+        }
+    };
 
     public String getImageUrl() {
         return imageUrl;

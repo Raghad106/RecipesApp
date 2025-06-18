@@ -1,6 +1,8 @@
 package com.ucas.firebaseminiproject.ui;
 
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
+import static com.ucas.firebaseminiproject.utilities.Constance.MY_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declareRecyclerView;
 
 import android.content.Context;
@@ -18,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
+import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentRecyclerViewBinding;
 import com.ucas.firebaseminiproject.ui.adapters.RecipeAdapter;
@@ -40,7 +43,7 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
     private List<Recipe> originalRecipes = new ArrayList<>();
     private RecipeAdapter adapter;
     private RecipeViewModel recipeViewModel;
-    private AuthViewModel authViewModel;
+    private ProfileViewModel profileViewModel;
     private OnItemListener.OnFragmentListener listener;
 
     // TODO: Rename and change types of parameters
@@ -74,6 +77,13 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
         fragment.setArguments(args);
         return fragment;
     }
+    public static RecyclerViewFragment newInstance(String param1) {
+        RecyclerViewFragment fragment = new RecyclerViewFragment();
+        Bundle args = new Bundle();
+        args.putString(TAG, param1);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,23 +99,31 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
                              Bundle savedInstanceState) {
         FragmentRecyclerViewBinding binding = FragmentRecyclerViewBinding.inflate(inflater, container, false);
         recipeViewModel = new ViewModelProvider(requireActivity()).get(RecipeViewModel.class);
-        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
+        profileViewModel = new ViewModelProvider(requireActivity()).get(ProfileViewModel.class);
         if (tag != null){
-            if (category != null){
-                if (category.equals("all")) {
-                    recipeViewModel.getAllRecipes(recipes -> {
-                        originalRecipes = recipes;
-                        adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
-                        declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
-                    });
-                } else {
-                    recipeViewModel.getRecipesByCategoryName(category.toLowerCase(), recipes -> {
-                        originalRecipes = recipes;
-                        adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
-                        declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
-                    });
+            if (tag.equals(CATEGORY_COLLECTION)){
+                if (category != null){
+                    if (category.equals("all")) {
+                        recipeViewModel.getAllRecipes(recipes -> {
+                            originalRecipes = recipes;
+                            adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
+                            declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
+                        });
+                    } else {
+                        recipeViewModel.getRecipesByCategoryName(category.toLowerCase(), recipes -> {
+                            originalRecipes = recipes;
+                            adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
+                            declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
+                        });
+                    }
+
                 }
 
+            }
+            else if (tag.equals(MY_RECIPE_TAG)){
+                profileViewModel.getRecipesByUserId(recipes -> {
+                    declareRecyclerView(requireContext(), new RecipeAdapter(RecyclerViewFragment.this, recipes), binding.rvItems, false);
+                });
             }
         }
         return binding.getRoot();

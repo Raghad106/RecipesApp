@@ -24,6 +24,10 @@ public class RecipeViewModel extends ViewModel {
         repository.createRecipe(categories, recipe, listener);
     }
 
+    public void editRecipe(List<String> oldCategories, List<String> categories, Recipe recipe, OnCompleteListener<Void> listener){
+        repository.editRecipe(oldCategories, categories, recipe, listener);
+    }
+
     public void getAllRecipes(OnFirebaseLoadedListener.OnRecipesLoaded listener) {
         repository.getAllRecipes(listener);
     }

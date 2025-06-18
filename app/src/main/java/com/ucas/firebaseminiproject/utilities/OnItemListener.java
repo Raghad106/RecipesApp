@@ -1,5 +1,7 @@
 package com.ucas.firebaseminiproject.utilities;
 
+import com.ucas.firebaseminiproject.data.models.Recipe;
+
 public interface OnItemListener {
 
      interface OnRecipeListener{
@@ -12,6 +14,7 @@ public interface OnItemListener {
      interface OnFragmentListener{
           void onNavigateFragments(String tag);
           void onNavigateRecipeDetailsFragment(String recipeId, String publisherId);
+          void onNavigateEditRecipeDetailsFragment(String tag, Recipe recipe);
      }
 
      public interface OnCategoryListener{

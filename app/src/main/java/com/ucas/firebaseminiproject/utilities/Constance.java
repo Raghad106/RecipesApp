@@ -29,7 +29,9 @@ public interface Constance {
 
     // Fragment Tags
     String ADD_RECIPE_TAG = "New Recipe Fragment";
+    String EDIT_RECIPE_TAG = "Edit a Recipe Fragment";
     String HOME_TAG = "Home Fragment";
+    String MY_RECIPE_TAG = "My recipe Fragment";
 
     // Method Tags
     String ADD_CATEGORY_TAG = "add category";

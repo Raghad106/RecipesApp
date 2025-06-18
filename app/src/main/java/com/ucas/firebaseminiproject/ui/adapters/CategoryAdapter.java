@@ -22,6 +22,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     private OnItemListener.OnCategoryListener listener;
     private boolean isSelectionMode; // true = first list (select), false = second list (remove)
 
+
     public CategoryAdapter(List<String> categories, List<String> selectedCategories, OnItemListener.OnCategoryListener listener, boolean isSelectionMode) {
         this.categories = categories;
         this.selectedCategories = selectedCategories;
@@ -31,6 +32,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     public List<String> getSelectedCategories() {
         return selectedCategories;
+    }
+
+    public List<String> getCategories() {
+        return categories;
     }
 
     public void setSelectedCategories(List<String> selectedCategories) {

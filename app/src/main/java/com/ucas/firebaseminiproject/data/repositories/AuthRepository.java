@@ -69,47 +69,5 @@ public class AuthRepository {
         return prefs.getBoolean(IS_REMEMBERED_KEY, false);
     }
 
-    public void getCurrentUserInfo(OnFirebaseLoadedListener.OnUserInfoLoadedListener listener) {
-        FirebaseUser user = auth.getCurrentUser();
-        Map<String, String> userInfo = new HashMap<>();
-
-        if (user != null) {
-            firestore.collection(USERS_COLLECTION).document(user.getUid())
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful() && task.getResult() != null) {
-                            userInfo.put(ID_MAP_KEY, user.getUid());
-                            String name = task.getResult().getString(NAME_MAP_KEY);
-                            String userImage = task.getResult().getString(IMAGE_MAP_KEY);
-                            userInfo.put(NAME_MAP_KEY, name != null ? name : "Unknown");
-                            userInfo.put(IMAGE_MAP_KEY, userImage != null ? userImage : "");
-                            listener.onUserInfoLoaded(userInfo);
-                        }
-                    });
-        }
-    }
-
-    public void getUserInfoById(String userId, OnFirebaseLoadedListener.OnUserInfoLoadedListener listener) {
-        Map<String, String> userInfo = new HashMap<>();
-
-        if (userId != null && !userId.isEmpty()) {
-            firestore.collection(USERS_COLLECTION).document(userId)
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful() && task.getResult() != null) {
-                            userInfo.put(ID_MAP_KEY, userId);
-                            String name = task.getResult().getString(NAME_MAP_KEY);
-                            String userImage = task.getResult().getString(IMAGE_MAP_KEY);
-                            userInfo.put(NAME_MAP_KEY, name != null ? name : "Unknown");
-                            userInfo.put(IMAGE_MAP_KEY, userImage != null ? userImage : "");
-                            listener.onUserInfoLoaded(userInfo);
-                        } else {
-                            listener.onUserInfoLoaded(new HashMap<>()); // Return empty map on failure
-                        }
-                    });
-        } else {
-            listener.onUserInfoLoaded(new HashMap<>()); // Return empty map if userId is invalid
-        }
-    }
 
 }

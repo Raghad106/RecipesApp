@@ -3,14 +3,16 @@ package com.ucas.firebaseminiproject.ui;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.ucas.firebaseminiproject.utilities.Constance.EDIT_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
-import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -21,11 +23,10 @@ import android.view.ViewGroup;
 
 import com.squareup.picasso.Picasso;
 import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
+import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentRecipeDetailsBinding;
 import com.ucas.firebaseminiproject.utilities.OnItemListener;
-
-import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,7 +40,8 @@ public class RecipeDetailsFragment extends Fragment {
     private static final String ARG_RECIPE_ID = "param1";
     private static final String ARG_PUBLISHER_ID = "param2";
     private RecipeViewModel recipeViewModel;
-    private AuthViewModel authViewModel;
+    private ProfileViewModel profileViewModel;
+    private OnItemListener.OnFragmentListener listener;
 
     // TODO: Rename and change types of parameters
     private String recipeId;
@@ -48,6 +50,12 @@ public class RecipeDetailsFragment extends Fragment {
 
     public RecipeDetailsFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        listener = (OnItemListener.OnFragmentListener) context;
     }
 
     /**
@@ -83,7 +91,7 @@ public class RecipeDetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
         FragmentRecipeDetailsBinding binding = FragmentRecipeDetailsBinding.inflate(inflater, container, false);
         recipeViewModel = new ViewModelProvider(requireActivity()).get(RecipeViewModel.class);
-        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
+        profileViewModel = new ViewModelProvider(requireActivity()).get(ProfileViewModel.class);
 
         binding.tvSteps.setOnTouchListener((v, event) -> {
             v.getParent().requestDisallowInterceptTouchEvent(true);
@@ -101,7 +109,7 @@ public class RecipeDetailsFragment extends Fragment {
         if (recipeId != null && publisherId != null){
             recipeViewModel.getRecipeByRecipeId(recipeId, publisherId, recipe -> {
                 if (recipe != null){
-                    authViewModel.getCurrentUserInfo(userInfo -> {
+                    profileViewModel.getCurrentUserInfo(userInfo -> {
                         if (recipe.getPublisherId().equals(userInfo.get(ID_MAP_KEY))){
                             binding.btnSave.setVisibility(GONE);
                             binding.btnEdit.setVisibility(VISIBLE);
@@ -137,6 +145,10 @@ public class RecipeDetailsFragment extends Fragment {
                             Intent intent = new Intent(Intent.ACTION_VIEW);
                             intent.setData(Uri.parse(recipe.getVideoUrl()));
                             startActivity(intent);
+                        });
+
+                        binding.btnEdit.setOnClickListener(view -> {
+                            listener.onNavigateEditRecipeDetailsFragment(EDIT_RECIPE_TAG, recipe);
                         });
                     });
 

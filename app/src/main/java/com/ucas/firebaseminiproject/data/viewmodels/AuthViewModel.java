@@ -30,11 +30,4 @@ public class AuthViewModel extends ViewModel {
         return repository.getRememberInfo(context);
     }
 
-    public void getCurrentUserInfo(OnFirebaseLoadedListener.OnUserInfoLoadedListener listener){
-        repository.getCurrentUserInfo(listener);
-    }
-
-    public void getUserInfoById(String userId, OnFirebaseLoadedListener.OnUserInfoLoadedListener listener){
-        repository.getUserInfoById(userId, listener);
-    }
 }
