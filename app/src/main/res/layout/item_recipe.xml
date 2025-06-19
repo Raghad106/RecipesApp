@@ -41,20 +41,22 @@
             app:layout_constraintStart_toStartOf="@id/ivRecipeImage"
             app:layout_constraintEnd_toEndOf="@id/ivRecipeImage" />
 
-        <!-- Save Icon Top Right -->
-        <ImageButton
-            android:id="@+id/btnSave"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_category_pill"
-            android:src="@drawable/ic_save"
-            android:contentDescription="Save"
-            android:elevation="4dp"
+        <TextView
+            android:id="@+id/tvLikesCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:text="Loved by 5"
+            android:textSize="12sp"
+            android:textColor="@color/orange_700"
+            android:background="@drawable/bg_circle_orange"
+            android:textStyle="bold"
             app:layout_constraintTop_toTopOf="@id/ivRecipeImage"
             app:layout_constraintEnd_toEndOf="@id/ivRecipeImage"
-            android:layout_margin="8dp" />
+            />
 
-        <!-- User Avatar -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivUserAvatar"
             android:layout_width="32dp"
@@ -68,7 +70,6 @@
             android:layout_gravity="center"
             app:shapeAppearanceOverlay="@style/CircleImageView"/>
 
-        <!-- Username -->
         <TextView
             android:id="@+id/tvUserName"
             android:layout_width="wrap_content"
@@ -82,31 +83,6 @@
             app:layout_constraintBottom_toBottomOf="@id/ivUserAvatar"
             app:layout_constraintStart_toEndOf="@id/ivUserAvatar" />
 
-        <!-- Like Icon -->
-        <ImageView
-            android:id="@+id/ivLike"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginEnd="4dp"
-            android:src="@drawable/ic_like"
-            app:layout_constraintEnd_toStartOf="@id/tvLikesCount"
-            app:layout_constraintTop_toTopOf="@+id/tvDescription" />
-
-        <!-- Like Count -->
-        <TextView
-            android:id="@+id/tvLikesCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:layout_marginEnd="8dp"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:layout_marginStart="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/ivLike"
-            app:layout_constraintTop_toTopOf="@id/ivLike" />
-
-        <!-- Category Pills (Sample Only) -->
         <TextView
             android:id="@+id/tvCategory1"
             android:layout_width="wrap_content"
@@ -156,7 +132,6 @@
             android:visibility="gone"
             />
 
-        <!-- Description -->
         <TextView
             android:id="@+id/tvDescription"
             android:layout_width="wrap_content"

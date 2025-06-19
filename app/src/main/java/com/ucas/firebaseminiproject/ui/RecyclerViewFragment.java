@@ -8,6 +8,7 @@ import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declar
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,7 +110,8 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
                             adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
                             declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
                         });
-                    } else {
+                    }
+                    else {
                         recipeViewModel.getRecipesByCategoryName(category.toLowerCase(), recipes -> {
                             originalRecipes = recipes;
                             adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
@@ -121,22 +123,12 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
 
             }
             else if (tag.equals(MY_RECIPE_TAG)){
-                profileViewModel.getRecipesByUserId(recipes -> {
+                profileViewModel.getSavedRecipes(recipes -> {
                     declareRecyclerView(requireContext(), new RecipeAdapter(RecyclerViewFragment.this, recipes), binding.rvItems, false);
                 });
             }
         }
         return binding.getRoot();
-    }
-
-    @Override
-    public boolean onLikeClicked(String recipeId, String userId) {
-        return false;
-    }
-
-    @Override
-    public boolean onSaveClicked(String recipeId, String userId) {
-        return false;
     }
 
     @Override

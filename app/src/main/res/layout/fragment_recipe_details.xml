@@ -96,9 +96,9 @@
             <!-- Like Icon -->
             <ImageView
                 android:id="@+id/ivLike"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_like"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_heart"
                 app:layout_constraintTop_toTopOf="@+id/tvTitle"
                 app:layout_constraintEnd_toStartOf="@id/tvLikesCount"
                 android:layout_marginEnd="4dp"
@@ -109,7 +109,6 @@
                 android:id="@+id/tvLikesCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="120"
                 android:textColor="@color/black"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="@+id/ivLike"
@@ -117,7 +116,7 @@
                 app:layout_constraintTop_toTopOf="@id/ivLike" />
 
             <!-- Avatar -->
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivUserAvatar"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -125,7 +124,8 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_account"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivLike" />
+                app:layout_constraintTop_toBottomOf="@id/ivLike"
+                app:shapeAppearanceOverlay="@style/CircleImageView"/>
 
             <!-- Username -->
             <TextView

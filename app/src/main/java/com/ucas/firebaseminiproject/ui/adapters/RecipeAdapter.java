@@ -21,10 +21,16 @@ import java.util.List;
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHolder> {
     List<Recipe> recipes;
     OnItemListener.OnRecipeListener listener;
+    boolean isSaved = false;
 
     public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipes) {
         this.listener = listener;
         this.recipes = recipes;
+    }
+    public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipe, boolean isSaved) {
+        this.listener = listener;
+        this.recipes = recipes;
+        this.isSaved = isSaved;
     }
 
     public void updateList(List<Recipe> newList) {
@@ -46,7 +52,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
         Recipe recipe = recipes.get(pos);
         recipeHolder.username.setText(recipe.getPublisherName());
         recipeHolder.description.setText(recipe.getTitle().toUpperCase());
-        recipeHolder.likesCounts.setText(String.valueOf(recipe.getLikesCount()));
+        recipeHolder.likesCounts.setText("Loved By "+recipe.getLikesCount());
         if (recipe.getPublisherImage() != null && !recipe.getPublisherImage().isEmpty())
             Picasso.get().load(recipe.getPublisherImage()).into(recipeHolder.accountImage);
 
@@ -67,23 +73,6 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
             recipeHolder.category3.setVisibility(ViewGroup.VISIBLE);
         }
 
-        if (listener.onLikeClicked(recipe.getRecipeId(), recipe.getPublisherId()))
-            recipeHolder.likeIcon.setColorFilter(Color.parseColor("#FB912C"));
-        else
-           // recipeHolder.likeIcon.setColorFilter(Color.parseColor("#8D8D8D"));
-
-        if (listener.onSaveClicked(recipe.getRecipeId(), recipe.getPublisherId()))
-            recipeHolder.saveIcon.setColorFilter(Color.parseColor("#FB912C"));
-        //else
-           // recipeHolder.saveIcon.setColorFilter(Color.parseColor("8D8D8DFF"));
-
-        recipeHolder.likeIcon.setOnClickListener(view -> {
-            listener.onLikeClicked(recipe.getRecipeId(), recipe.getPublisherId());
-        });
-
-        recipeHolder.saveIcon.setOnClickListener(view -> {
-            listener.onSaveClicked(recipe.getRecipeId(), recipe.getPublisherId());
-        });
 
         recipeHolder.playIcon.setOnClickListener(view -> {
             listener.onVideoClicked(recipe.getVideoUrl());
@@ -101,15 +90,13 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
 
 
     public class RecipeHolder extends RecyclerView.ViewHolder {
-        ImageButton playIcon, saveIcon;
+        ImageButton playIcon;
         CardView layout;
-        ImageView likeIcon, accountImage, recipeImage;
+        ImageView accountImage, recipeImage;
         TextView username, description, category1, category2, category3, likesCounts;
         public RecipeHolder(@NonNull ItemRecipeBinding binding) {
             super(binding.getRoot());
             playIcon = binding.btnPlayVideo;
-            saveIcon = binding.btnSave;
-            likeIcon = binding.ivLike;
             accountImage = binding.ivUserAvatar;
             recipeImage = binding.ivRecipeImage;
             username = binding.tvUserName;

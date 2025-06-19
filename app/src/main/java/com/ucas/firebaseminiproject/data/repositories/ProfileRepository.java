@@ -6,13 +6,18 @@ import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_COLLECTION;
+import static com.ucas.firebaseminiproject.utilities.Constance.SAVED_RECIPES_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
@@ -26,6 +31,7 @@ import java.util.Map;
 public class ProfileRepository {
     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     FirebaseAuth auth =FirebaseAuth.getInstance();
+    RecipeRepository recipeRepository = new RecipeRepository();
 
     public void getRecipesByUserId(OnFirebaseLoadedListener.OnRecipesLoaded loaded){
         this.getCurrentUserInfo(userInfo -> {
@@ -98,4 +104,111 @@ public class ProfileRepository {
         if (userInfo != null && !userInfo.isEmpty())
             firestore.collection(USERS_COLLECTION).document(userId).set(userInfo, SetOptions.merge()).addOnCompleteListener(listener);
     }
+
+    public void toggleSaveRecipe(String recipeId, OnFirebaseLoadedListener.OnSaveRecipeLoadedListener listener) {
+        getCurrentUserInfo(userInfo -> {
+            DocumentReference savedRecipeDocument = firestore
+                    .collection(USERS_COLLECTION)
+                    .document(userInfo.get(ID_MAP_KEY))
+                    .collection(SAVED_RECIPES_COLLECTION)
+                    .document(recipeId);
+
+            savedRecipeDocument.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    if (task.getResult().exists()) {
+                        // Already saved → unsave it
+                        savedRecipeDocument.delete().addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                listener.onSaveRecipeLoadedListener(false);
+                            }
+                        });
+                    } else {
+                        // Not saved → save it
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("recipeId", recipeId);
+                        data.put("savedAt", FieldValue.serverTimestamp()); // optional
+                        savedRecipeDocument.set(data).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                listener.onSaveRecipeLoadedListener(true);
+                            }
+                        });
+                    }
+                } else {
+                    // Handle failure (optional)
+                    listener.onSaveRecipeLoadedListener(false);
+                }
+            });
+        });
+    }
+
+    public void checkIsSaved(String recipeId, OnFirebaseLoadedListener.OnSaveRecipeLoadedListener listener) {
+        getCurrentUserInfo(userInfo -> {
+            DocumentReference savedRecipeDocument = firestore
+                    .collection(USERS_COLLECTION)
+                    .document(userInfo.get(ID_MAP_KEY))
+                    .collection(SAVED_RECIPES_COLLECTION)
+                    .document(recipeId);
+
+            savedRecipeDocument.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    if (task.getResult().exists()) {
+                        listener.onSaveRecipeLoadedListener(true);
+                    } else {
+                        listener.onSaveRecipeLoadedListener(false);
+                    }
+                } else {
+                    // Handle failure (optional)
+                    listener.onSaveRecipeLoadedListener(false);
+                }
+            });
+        });
+    }
+
+    public void getSavedRecipes(OnFirebaseLoadedListener.OnRecipesLoaded listener) {
+        getCurrentUserInfo(userInfo -> {
+            List<Recipe> recipes = new ArrayList<>();
+            String userId = userInfo.get(ID_MAP_KEY);
+
+            if (userId == null) {
+                listener.onRecipeLoaded(new ArrayList<>());
+                return;
+            }
+
+            firestore.collection(USERS_COLLECTION)
+                    .document(userId)
+                    .collection(SAVED_RECIPES_COLLECTION)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful() || task.getResult().isEmpty()) {
+                            listener.onRecipeLoaded(new ArrayList<>());
+                            return;
+                        }
+
+                        List<DocumentSnapshot> savedDocs = task.getResult().getDocuments();
+                        List<String> recipeIds = new ArrayList<>();
+                        for (DocumentSnapshot doc : savedDocs) {
+                            String recipeId = doc.getString("recipeId");
+                            if (recipeId != null) recipeIds.add(recipeId);
+                        }
+
+                        if (recipeIds.isEmpty()) {
+                            listener.onRecipeLoaded(new ArrayList<>());
+                            return;
+                        }
+
+                        // Fetch all recipes one by one
+                        for (String recipeId : recipeIds) {
+                            recipeRepository.getRecipeByRecipeId(recipeId, userId, recipe -> {
+                                if (recipe != null) recipes.add(recipe);
+
+                                // Once all recipes are loaded, return them
+                                if (recipes.size() == recipeIds.size()) {
+                                    listener.onRecipeLoaded(recipes);
+                                }
+                            });
+                        }
+                    });
+        });
+    }
+
 }

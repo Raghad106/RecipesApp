@@ -13,7 +13,7 @@ public class Recipe implements Parcelable {
     private String publisherName;
     private String publisherImage;
     private boolean isSaved;
-    private int likesCount;
+    private long likesCount;
     private List<String> categories;
     private String title;
     private String steps;
@@ -68,7 +68,7 @@ public class Recipe implements Parcelable {
         dest.writeString(publisherName);
         dest.writeString(publisherImage);
         dest.writeByte((byte) (isSaved ? 1 : 0));
-        dest.writeInt(likesCount);
+        dest.writeLong(likesCount);
         dest.writeStringList(categories);
         dest.writeString(title);
         dest.writeString(steps);
@@ -132,11 +132,11 @@ public class Recipe implements Parcelable {
         isSaved = saved;
     }
 
-    public int getLikesCount() {
+    public long getLikesCount() {
         return likesCount;
     }
 
-    public void setLikesCount(int likesCount) {
+    public void setLikesCount(long likesCount) {
         this.likesCount = likesCount;
     }
 

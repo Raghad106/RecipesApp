@@ -13,6 +13,7 @@ import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declareRecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -22,27 +23,21 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.ucas.firebaseminiproject.R;
 import com.ucas.firebaseminiproject.data.uplodeImage.CloudinaryHelper;
 import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;
-import com.ucas.firebaseminiproject.databinding.FragmentAddRecipeBinding;
 import com.ucas.firebaseminiproject.databinding.FragmentProfileBinding;
 import com.ucas.firebaseminiproject.ui.adapters.RecipeAdapter;
 import com.ucas.firebaseminiproject.utilities.OnItemListener;
-import com.ucas.firebaseminiproject.utilities.ViewsCustomListeners;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -172,7 +167,7 @@ public class ProfileFragment extends Fragment implements OnItemListener.OnRecipe
                                 @Override
                                 public void onSuccess(String imageUrl) {
                                     updatedUserInfo.put(IMAGE_MAP_KEY, imageUrl);
-                                    profileViewModel.updateUserInf(userInfo.get(ID_MAP_KEY), updatedUserInfo, task -> {
+                                    profileViewModel.updateUserInfo(userInfo.get(ID_MAP_KEY), updatedUserInfo, task -> {
                                         binding.ivAdd.setVisibility(GONE);
                                         binding.btnEdit.setVisibility(GONE);
                                         binding.ivEditProfile.setVisibility(VISIBLE);
@@ -209,22 +204,14 @@ public class ProfileFragment extends Fragment implements OnItemListener.OnRecipe
     }
 
     @Override
-    public boolean onLikeClicked(String recipeId, String userId) {
-        return false;
-    }
-
-    @Override
-    public boolean onSaveClicked(String recipeId, String userId) {
-        return false;
-    }
-
-    @Override
     public void onLayoutClicked(String recipeId, String userId) {
-
+        listener.onNavigateRecipeDetailsFragment(recipeId, userId);
     }
 
     @Override
     public void onVideoClicked(String videoLink) {
-
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(videoLink));
+        startActivity(intent);
     }
 }

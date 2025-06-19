@@ -13,7 +13,8 @@ public interface Constance {
     String USERS_COLLECTION ="Users";
     String CATEGORY_COLLECTION ="Categories";
     String RECIPE_COLLECTION ="Recipes";
-    String LIKED_BY_COLLECTION ="Likes";
+    String LIKES_COLLECTION ="Likes";
+    String SAVED_RECIPES_COLLECTION ="Saved Recipes";
 
     // User Document's filed
     String ID_MAP_KEY ="uid";

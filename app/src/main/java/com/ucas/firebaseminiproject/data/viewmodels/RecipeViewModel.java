@@ -44,4 +44,12 @@ public class RecipeViewModel extends ViewModel {
         repository.deleteRecipe(recipeId, listener);
     }
 
+    public void toggleLike(String recipeId, String userId, OnFirebaseLoadedListener.OnLikeLoadedListener listener){
+        repository.toggleLike(recipeId, userId, listener);
+    }
+
+    public void checkLikeStatus(String recipeId, String userId, OnFirebaseLoadedListener.OnLikeLoadedListener listener){
+        repository.checkLikeStatus(recipeId, userId, listener);
+    }
+
 }

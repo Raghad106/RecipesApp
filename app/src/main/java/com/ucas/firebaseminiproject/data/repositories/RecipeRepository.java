@@ -3,23 +3,30 @@ package com.ucas.firebaseminiproject.data.repositories;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_NAME;
 import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.LIKES_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_ID;
 import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
 
+import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -164,6 +171,7 @@ public class RecipeRepository {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public void getAllRecipes(OnFirebaseLoadedListener.OnRecipesLoaded listener) {
         List<Recipe> recipes = new ArrayList<>();
 
@@ -193,7 +201,8 @@ public class RecipeRepository {
                                 recipe.setPublisherImage(userDoc.getString(IMAGE_MAP_KEY)); // ← you wrote setPublisherName again
                                 recipes.add(recipe);
                             }
-                            listener.onRecipeLoaded(recipes);
+                            listener.onRecipeLoaded(recipes.reversed());
+
                         }).addOnFailureListener(e -> {
                             listener.onRecipeLoaded(new ArrayList<>());
                         });
@@ -239,6 +248,7 @@ public class RecipeRepository {
                             recipe.setPublisherImage(userDoc.getString(IMAGE_MAP_KEY)); // Make sure this is a real method
                             recipes.add(recipe);
                         }
+
                         listener.onRecipeLoaded(recipes);
                     });
                 }).addOnFailureListener(e -> {
@@ -273,4 +283,76 @@ public class RecipeRepository {
         if (recipeId != null && !recipeId.isEmpty())
             firestore.collection(RECIPE_COLLECTION).document(recipeId).delete().addOnCompleteListener(listener);
     }
+
+    public void toggleLike(String recipeId, String userId, OnFirebaseLoadedListener.OnLikeLoadedListener listener) {
+        DocumentReference likeDocRef = firestore
+                .collection(RECIPE_COLLECTION)
+                .document(recipeId)
+                .collection(LIKES_COLLECTION)
+                .document(userId);
+
+        DocumentReference recipeRef = firestore
+                .collection(RECIPE_COLLECTION)
+                .document(recipeId);
+
+        likeDocRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                boolean isLiked;
+
+                if (task.getResult().exists()) {
+                    // User has already liked → remove like
+                    likeDocRef.delete();
+                    recipeRef.update("likesCount", FieldValue.increment(-1));
+                    isLiked = false;
+                } else {
+                    // User has not liked → add like
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("userId", userId);
+                    //data.put("likedAt", FieldValue.serverTimestamp()); // optional
+
+                    likeDocRef.set(data);
+                    recipeRef.update("likesCount", FieldValue.increment(1));
+                    isLiked = true;
+                }
+
+                // Fetch updated count
+                recipeRef.get().addOnSuccessListener(recipeSnapshot -> {
+                    long count = recipeSnapshot.contains("likesCount")
+                            ? recipeSnapshot.getLong("likesCount")
+                            : 0;
+                    listener.onLikeLoadedListener(isLiked, count);
+                });
+
+            } else {
+                listener.onLikeLoadedListener(false, -1); // error case
+                Log.e("myToggleLike", "Failed to read like document: " + task.getException());
+            }
+        }).addOnFailureListener(e -> {
+            listener.onLikeLoadedListener(false, -1);
+            Log.e("myToggleLike", "Error toggling like: " + e.getMessage());
+        });
+    }
+
+    public void checkLikeStatus(String recipeId, String userId, OnFirebaseLoadedListener.OnLikeLoadedListener listener) {
+        DocumentReference recipeRef = firestore.collection(RECIPE_COLLECTION).document(recipeId);
+        DocumentReference likeDocRef = recipeRef.collection(LIKES_COLLECTION).document(userId);
+
+        Log.d("checkLikeStatus", "Checking like status for userId: " + userId + ", recipeId: " + recipeId);
+
+        likeDocRef.get().addOnCompleteListener(task -> {
+            boolean isLiked = task.isSuccessful() && task.getResult().exists();
+            Log.d("checkLikeStatus", "Like doc exists: " + isLiked);
+
+            recipeRef.get().addOnSuccessListener(snapshot -> {
+                long count = snapshot.contains("likesCount") ? snapshot.getLong("likesCount") : 0;
+                Log.d("checkLikeStatus", "likesCount = " + count);
+                listener.onLikeLoadedListener(isLiked, count);
+            }).addOnFailureListener(e -> {
+                Log.e("checkLikeStatus", "Error getting recipe document", e);
+                listener.onLikeLoadedListener(isLiked, 0);
+            });
+        });
+    }
+
 }
+

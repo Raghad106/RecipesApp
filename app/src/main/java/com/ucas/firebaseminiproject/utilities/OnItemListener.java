@@ -5,8 +5,6 @@ import com.ucas.firebaseminiproject.data.models.Recipe;
 public interface OnItemListener {
 
      interface OnRecipeListener{
-          boolean onLikeClicked(String recipeId, String userId);
-          boolean onSaveClicked(String recipeId, String userId);
           void onLayoutClicked(String recipeId, String userId);
           void onVideoClicked(String videoLink);
      }

@@ -10,6 +10,7 @@ import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -18,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -155,6 +157,45 @@ public class RecipeDetailsFragment extends Fragment {
 
                         binding.btnDelete.setOnClickListener(view -> {
                             listener.onDeleteRecipe(DIALOG_RECIPE_TAG, recipeId);
+                        });
+
+                        recipeViewModel.checkLikeStatus(recipeId, userInfo.get(ID_MAP_KEY), (isLike, likeCount) -> {
+                            Log.d("LIKE", "Like icon"+isLike+likeCount);
+                            if (isLike)
+                                binding.ivLike.setColorFilter(Color.parseColor("#FB912C"));
+                            else
+                                binding.ivLike.setColorFilter(Color.parseColor("#606060"));
+
+                            binding.tvLikesCount.setText(String.valueOf(likeCount));
+                        });
+
+                        binding.ivLike.setOnClickListener(view -> {
+                            Log.d("LIKE", "Like icon clicked");
+                            recipeViewModel.toggleLike(recipeId, userInfo.get(ID_MAP_KEY), (isLike, likeCount) -> {
+                                if (isLike)
+                                    binding.ivLike.setColorFilter(Color.parseColor("#FB912C"));
+                                else
+                                    binding.ivLike.setColorFilter(Color.parseColor("#606060"));
+
+                                binding.tvLikesCount.setText(String.valueOf(likeCount));
+                            });
+                        });
+
+                        profileViewModel.checkIsSaved(recipeId, isSave -> {
+                            if (isSave)
+                                binding.btnSave.setColorFilter(Color.parseColor("#FB912C"));
+                            else
+                                binding.btnSave.setColorFilter(Color.parseColor("#FFFFFF"));
+
+                        });
+
+                        binding.btnSave.setOnClickListener(view -> {
+                            profileViewModel.toggleSaveRecipe(recipeId, isSave -> {
+                                if (isSave)
+                                    binding.btnSave.setColorFilter(Color.parseColor("#FB912C"));
+                                else
+                                    binding.btnSave.setColorFilter(Color.parseColor("#FFFFFF"));
+                            });
                         });
                     });
 

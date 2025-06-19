@@ -18,4 +18,10 @@ public interface OnFirebaseLoadedListener {
     interface OnUserInfoLoadedListener{
         void onUserInfoLoaded(Map<String, String> userInfo);
     }
+    interface OnLikeLoadedListener{
+        void onLikeLoadedListener(boolean isLike, long likeCount);
+    }
+    interface OnSaveRecipeLoadedListener{
+        void onSaveRecipeLoadedListener(boolean isSave);
+    }
 }
