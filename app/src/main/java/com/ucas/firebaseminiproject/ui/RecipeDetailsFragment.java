@@ -3,6 +3,7 @@ package com.ucas.firebaseminiproject.ui;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.ucas.firebaseminiproject.utilities.Constance.DIALOG_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.EDIT_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
 
@@ -106,6 +107,7 @@ public class RecipeDetailsFragment extends Fragment {
         binding.tvIngredients.setMovementMethod(new ScrollingMovementMethod());
         binding.tvSteps.setMovementMethod(new ScrollingMovementMethod());
 
+
         if (recipeId != null && publisherId != null){
             recipeViewModel.getRecipeByRecipeId(recipeId, publisherId, recipe -> {
                 if (recipe != null){
@@ -119,7 +121,7 @@ public class RecipeDetailsFragment extends Fragment {
                             binding.btnEdit.setVisibility(GONE);
                             binding.btnDelete.setVisibility(GONE);
                         }
-                        if (!recipe.getImageUrl().isEmpty())
+                        if (recipe.getImageUrl() != null && !recipe.getImageUrl().isEmpty())
                             Picasso.get().load(recipe.getImageUrl()).fit().centerCrop().into(binding.ivRecipeImage);
                         if (recipe.getPublisherImage() != null && !recipe.getPublisherImage().isEmpty())
                             Picasso.get().load(recipe.getPublisherImage()).fit().centerCrop().into(binding.ivUserAvatar);
@@ -149,6 +151,10 @@ public class RecipeDetailsFragment extends Fragment {
 
                         binding.btnEdit.setOnClickListener(view -> {
                             listener.onNavigateEditRecipeDetailsFragment(EDIT_RECIPE_TAG, recipe);
+                        });
+
+                        binding.btnDelete.setOnClickListener(view -> {
+                            listener.onDeleteRecipe(DIALOG_RECIPE_TAG, recipeId);
                         });
                     });
 

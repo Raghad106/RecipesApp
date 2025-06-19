@@ -156,6 +156,11 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
                 binding.etStep.append(binding.tvContainerSteps.getText().toString() + "\n");
             });
 
+            // Add a new photo
+            binding.ivRecipeImage.setOnClickListener(view -> {
+                galleryLauncher.launch("image/*");
+            });
+
             if (tag.equals(ADD_RECIPE_TAG)){
                 // View all Categories
                 recipeViewModel.getAllCategories(categories -> {
@@ -170,7 +175,8 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
                             !binding.tvContainerIngredients.getText().toString().isEmpty() &&
                             !binding.etTitle.getText().toString().isEmpty() &&
                             !binding.etVideoUrl.getText().toString().isEmpty()&&
-                            !selectedCategories.isEmpty() && selectedCategories != null
+                            !selectedCategories.isEmpty() && selectedCategories != null &&
+                            selectedImageUri != null
                     ){
                         // To Prevent user from create more than one
                         binding.btnSubmit.setEnabled(false);
@@ -205,9 +211,6 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
                                         Toast.makeText(requireContext(), "Image upload failed: " + error, LENGTH_SHORT).show();
                                     }
                                 });
-                            } else {
-                                recipe.setImageUrl(null);
-                                saveRecipe(recipe, newCategoryMap);
                             }
                         });
                     }
@@ -239,36 +242,49 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
                 declareRecyclerView(requireActivity(), adapter2, binding.rvSelectedCategories, true);
 
                 binding.btnSubmit.setOnClickListener(view -> {
-                    CategoryAdapter adapter1=(CategoryAdapter)binding.rvSelectedCategories.getAdapter();
-                    // To Prevent user from create more than one
                     binding.btnSubmit.setEnabled(false);
-                    // I used pojo class to add recipe
-                    //recipe.setCategories(selectedCategories);
-                    recipe.setTitle(binding.etTitle.getText().toString());
-                    recipe.setSteps(binding.tvContainerSteps.getText().toString());
-                    recipe.setIngredients(binding.tvContainerIngredients.getText().toString());
-                    recipe.setVideoUrl(binding.etVideoUrl.getText().toString());
+                    CategoryAdapter adapter1 = (CategoryAdapter) binding.rvSelectedCategories.getAdapter();
 
+                    String title = binding.etTitle.getText().toString().trim();
+                    String steps = binding.tvContainerSteps.getText().toString().trim();
+                    String ingredients = binding.tvContainerIngredients.getText().toString().trim();
+                    String videoUrl = binding.etVideoUrl.getText().toString().trim();
 
-                    if (selectedImageUri != null) {
-                        uploadImageToCloudinary(requireContext(), selectedImageUri, new CloudinaryHelper.OnUploadCompleteListener() {
-                            @Override
-                            public void onSuccess(String imageUrl) {
-                                recipe.setImageUrl(imageUrl);
-                                if (adapter1 != null)
-                                    editRecipe(oldCategories, adapter1.getCategories(), recipe); // proceed after image upload
+                    if (!title.isEmpty() && !steps.isEmpty() && !ingredients.isEmpty() && !videoUrl.isEmpty()) {
+                        recipe.setTitle(title);
+                        recipe.setSteps(steps);
+                        recipe.setIngredients(ingredients);
+                        recipe.setVideoUrl(videoUrl);
+
+                        if (adapter1 != null) {
+                            List<String> newCategories = adapter1.getCategories();
+
+                            if (selectedImageUri != null) {
+                                // Upload new image
+                                uploadImageToCloudinary(requireContext(), selectedImageUri, new CloudinaryHelper.OnUploadCompleteListener() {
+                                    @Override
+                                    public void onSuccess(String imageUrl) {
+                                        recipe.setImageUrl(imageUrl);
+                                        editRecipe(oldCategories, newCategories, recipe);
+                                    }
+
+                                    @Override
+                                    public void onFailure(String error) {
+                                        binding.btnSubmit.setEnabled(true); // re-enable button
+                                        Toast.makeText(requireContext(), "Image upload failed: " + error, LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                // No new image, just update the recipe
+                                editRecipe(oldCategories, newCategories, recipe);
                             }
-
-                            @Override
-                            public void onFailure(String error) {
-                                Toast.makeText(requireContext(), "Image upload failed: " + error, LENGTH_SHORT).show();
-                            }
-                        });
+                        }
                     } else {
-                        if (adapter1 != null)
-                            editRecipe(oldCategories,adapter1.getCategories() , recipe);
+                        binding.btnSubmit.setEnabled(true);
+                        Toast.makeText(requireContext(), "Please fill all fields", LENGTH_SHORT).show();
                     }
                 });
+
             }
 
         }

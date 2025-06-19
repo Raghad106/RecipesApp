@@ -268,4 +268,9 @@ public class RecipeRepository {
             }
         });
     }
+
+    public void deleteRecipe(String recipeId, OnCompleteListener<Void> listener){
+        if (recipeId != null && !recipeId.isEmpty())
+            firestore.collection(RECIPE_COLLECTION).document(recipeId).delete().addOnCompleteListener(listener);
+    }
 }

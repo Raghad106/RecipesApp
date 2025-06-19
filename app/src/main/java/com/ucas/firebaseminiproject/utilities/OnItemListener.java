@@ -14,11 +14,16 @@ public interface OnItemListener {
      interface OnFragmentListener{
           void onNavigateFragments(String tag);
           void onNavigateRecipeDetailsFragment(String recipeId, String publisherId);
+          void onDeleteRecipe(String tag, String recipeId);
           void onNavigateEditRecipeDetailsFragment(String tag, Recipe recipe);
      }
 
-     public interface OnCategoryListener{
+     interface OnCategoryListener{
           void onCategoryClicked();
+     }
+
+     interface OnIntentListener {
+          void onIntentListener(String tag);
      }
 }
 

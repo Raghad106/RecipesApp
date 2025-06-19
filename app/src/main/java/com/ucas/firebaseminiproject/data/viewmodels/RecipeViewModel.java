@@ -40,4 +40,8 @@ public class RecipeViewModel extends ViewModel {
         repository.getRecipeByRecipeId(recipeId, userId, listener);
     }
 
+    public void deleteRecipe(String recipeId, OnCompleteListener<Void> listener){
+        repository.deleteRecipe(recipeId, listener);
+    }
+
 }

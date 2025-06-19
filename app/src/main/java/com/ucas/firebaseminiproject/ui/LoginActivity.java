@@ -52,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
             if (!isEmpty){
                 authViewModel.loginUser(binding.etLoginEmail.getText().toString(), binding.etLoginPassword.getText().toString(), task -> {
                     if (task.isSuccessful()) {
+                        binding.btnLogin.setEnabled(false);
                         Toast.makeText(this, "login Successfully", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         // Go to home or login

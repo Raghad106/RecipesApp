@@ -90,6 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                     authViewModel.registerUser(map, task -> {
                         if (task.isSuccessful()) {
+                            binding.btnRegister.setEnabled(false);
                             Toast.makeText(this, "Registered Successfully", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                             // Go to home or login

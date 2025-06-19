@@ -32,6 +32,8 @@ public interface Constance {
     String EDIT_RECIPE_TAG = "Edit a Recipe Fragment";
     String HOME_TAG = "Home Fragment";
     String MY_RECIPE_TAG = "My recipe Fragment";
+    String DIALOG_LOGOUT_TAG = "Dialog Logout Fragment";
+    String DIALOG_RECIPE_TAG = "Dialog Recipe Fragment";
 
     // Method Tags
     String ADD_CATEGORY_TAG = "add category";
