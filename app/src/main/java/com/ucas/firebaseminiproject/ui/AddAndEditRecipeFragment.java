@@ -121,23 +121,6 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
             // I used map to add category
             Map<String, String> newCategoryMap = new HashMap<>();
 
-
-            // Add a new category to selected categories not to categories collection
-            binding.btnAddCategory.setOnClickListener(v -> {
-                String newCategory = binding.etCategory.getText().toString().trim();
-
-                if (!newCategory.isEmpty() && selectedCategories.size() < 3 && !selectedCategories.contains(newCategory.toLowerCase())) {
-                    selectedCategories.add(newCategory);
-
-                    CategoryAdapter adapter2 = new CategoryAdapter(selectedCategories, selectedCategories, this, false);
-                    declareRecyclerView(requireActivity(),adapter2, binding.rvSelectedCategories, true);
-
-                    binding.etCategory.setText("");
-                } else {
-                    Toast.makeText(requireContext(), "You can only select up to 3 unique categories", LENGTH_SHORT).show();
-                }
-            });
-
             // Add new Ingredient
             binding.btnAddIngredient.setOnClickListener(view -> {
                 binding.tvContainerIngredients.setVisibility(VISIBLE);
@@ -167,6 +150,23 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
                     adapter = new CategoryAdapter(categories, selectedCategories, AddAndEditRecipeFragment.this, true);
                     declareRecyclerView(requireActivity() ,adapter, binding.rvCategories, true);
                 });
+
+                // Add a new category to selected categories not to categories collection
+                binding.btnAddCategory.setOnClickListener(v -> {
+                    String newCategory = binding.etCategory.getText().toString().trim();
+
+                    if (!newCategory.isEmpty() && selectedCategories.size() < 3 && !selectedCategories.contains(newCategory.toLowerCase())) {
+                        selectedCategories.add(newCategory);
+
+                        CategoryAdapter adapter2 = new CategoryAdapter(selectedCategories, selectedCategories, this, false);
+                        declareRecyclerView(requireActivity(),adapter2, binding.rvSelectedCategories, true);
+
+                        binding.etCategory.setText("");
+                    } else {
+                        Toast.makeText(requireContext(), "You can only select up to 3 unique categories", LENGTH_SHORT).show();
+                    }
+                });
+
                 // Add new generated categories to categories collection in firebase and then
                 // add a new recipe to global recipes collection and recipes collection in category document
                 binding.btnSubmit.setOnClickListener(view -> {
@@ -217,16 +217,36 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
                     else
                         Toast.makeText(requireContext(), "There is empty field", LENGTH_SHORT).show();
                 });
-            } else if (tag.equals(EDIT_RECIPE_TAG) && recipe != null) {
+            }
+
+            else if (tag.equals(EDIT_RECIPE_TAG) && recipe != null) {
                 if (!recipe.getImageUrl().isEmpty() && recipe.getImageUrl() != null)
                     Picasso.get().load(recipe.getImageUrl()).fit().centerCrop().into(binding.ivRecipeImage);
                 final List<String> oldCategories = new ArrayList<>(recipe.getCategories());
+                selectedCategories = recipe.getCategories();
                 Log.d("recipesCt", "old"+oldCategories.size());
                 // View all Categories
                 recipeViewModel.getAllCategories(categories -> {
                     adapter = new CategoryAdapter(categories, recipe.getCategories(), AddAndEditRecipeFragment.this, true);
                     declareRecyclerView(requireActivity() ,adapter, binding.rvCategories, true);
                 });
+
+                // Add a new category to selected categories not to categories collection
+                binding.btnAddCategory.setOnClickListener(v -> {
+                    String newCategory = binding.etCategory.getText().toString().trim();
+
+                    if (!newCategory.isEmpty() && selectedCategories.size() < 3 && !selectedCategories.contains(newCategory.toLowerCase())) {
+                        selectedCategories.add(newCategory);
+
+                        CategoryAdapter adapter2 = new CategoryAdapter(selectedCategories, selectedCategories, this, false);
+                        declareRecyclerView(requireActivity(),adapter2, binding.rvSelectedCategories, true);
+
+                        binding.etCategory.setText("");
+                    } else {
+                        Toast.makeText(requireContext(), "You can only select up to 3 unique categories", LENGTH_SHORT).show();
+                    }
+                });
+
                 binding.tvTitle.setText("Edit a Recipe information");
                 binding.btnSubmit.setText("Apply Updates");
                 binding.etTitle.setText(recipe.getTitle());
@@ -237,7 +257,7 @@ public class AddAndEditRecipeFragment extends Fragment implements OnItemListener
                 binding.tvContainerIngredients.setText(recipe.getIngredients());
                 binding.etIngredient.setText(recipe.getIngredients());
                 binding.etVideoUrl.setText(recipe.getVideoUrl());
-                //selectedCategories = recipe.getCategories();
+
                 CategoryAdapter adapter2 = new CategoryAdapter(recipe.getCategories(), recipe.getCategories(), this, false);
                 declareRecyclerView(requireActivity(), adapter2, binding.rvSelectedCategories, true);
 

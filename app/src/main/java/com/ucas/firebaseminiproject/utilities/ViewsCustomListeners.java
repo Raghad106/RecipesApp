@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class ViewsCustomListeners {
-    public static int STUDENT_ID;
 
     public static boolean hideAndShowPassword(boolean isPasswordShown, EditText et){
         if (isPasswordShown){
@@ -48,24 +47,6 @@ public class ViewsCustomListeners {
             tv.setText("There are empty fields");
 
         return isEmpty;
-    }
-
-    public static void enableOrNotAllEditTextsNotEmpty(List<EditText> editTexts, boolean isEnable){
-        if (isEnable){
-            for (EditText editText : editTexts) {
-                editText.setEnabled(true); //ensure all EditTexts are disabled in non-edit mode
-            }
-        }
-        else{
-            for (EditText editText : editTexts) {
-                editText.setEnabled(false); //ensure all EditTexts are disabled in non-edit mode
-            }
-        }
-    }
-
-    public static boolean checkPermissions(Context context) {
-        return ContextCompat.checkSelfPermission(context, CAMERA_PERMISSION) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(context, STORAGE_PERMISSION) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static void declareRecyclerView(Context context, RecyclerView.Adapter adapter, RecyclerView recyclerView, boolean isLinear){

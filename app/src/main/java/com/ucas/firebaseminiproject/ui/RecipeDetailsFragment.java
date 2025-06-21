@@ -3,9 +3,11 @@ package com.ucas.firebaseminiproject.ui;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.ucas.firebaseminiproject.utilities.Constance.CURRENT_USER_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.DIALOG_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.EDIT_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.USER_TAG;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -111,7 +113,7 @@ public class RecipeDetailsFragment extends Fragment {
 
 
         if (recipeId != null && publisherId != null){
-            recipeViewModel.getRecipeByRecipeId(recipeId, publisherId, recipe -> {
+            recipeViewModel.getRecipeByRecipeId(recipeId, recipe -> {
                 if (recipe != null){
                     profileViewModel.getCurrentUserInfo(userInfo -> {
                         if (recipe.getPublisherId().equals(userInfo.get(ID_MAP_KEY))){
@@ -156,7 +158,7 @@ public class RecipeDetailsFragment extends Fragment {
                         });
 
                         binding.btnDelete.setOnClickListener(view -> {
-                            listener.onDeleteRecipe(DIALOG_RECIPE_TAG, recipeId);
+                            listener.onDeleteRecipe(DIALOG_RECIPE_TAG, recipe);
                         });
 
                         recipeViewModel.checkLikeStatus(recipeId, userInfo.get(ID_MAP_KEY), (isLike, likeCount) -> {
@@ -196,6 +198,18 @@ public class RecipeDetailsFragment extends Fragment {
                                 else
                                     binding.btnSave.setColorFilter(Color.parseColor("#FFFFFF"));
                             });
+                        });
+
+                        binding.ivUserAvatar.setOnClickListener(view -> {
+                            String  userId = recipe.getPublisherId();
+                            if (userId != null && !userId.isEmpty()){
+                                profileViewModel.getCurrentUserInfo(userInfo2 -> {
+                                    if (userInfo2.get(ID_MAP_KEY).equals(userId))
+                                        listener.onNavigateFragments(CURRENT_USER_TAG);
+                                    else
+                                        listener.onNavigateToUserProfile(USER_TAG, userId);
+                                });
+                            }
                         });
                     });
 

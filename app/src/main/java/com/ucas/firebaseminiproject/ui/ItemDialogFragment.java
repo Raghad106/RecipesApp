@@ -16,6 +16,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.ucas.firebaseminiproject.R;
+import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.utilities.OnItemListener;
@@ -29,7 +30,7 @@ public class ItemDialogFragment extends DialogFragment {
 
     private String deleteMsg;
     private String tag;
-    private String recipeId;
+    private Recipe recipe;
     private AuthViewModel authViewModel;
     private RecipeViewModel recipeViewModel;
     private OnItemListener.OnIntentListener listener;
@@ -54,12 +55,12 @@ public class ItemDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    public static ItemDialogFragment newInstance(String deleteMsg, String tag, String recipeId) {
+    public static ItemDialogFragment newInstance(String deleteMsg, String tag, Recipe recipe) {
         ItemDialogFragment fragment = new ItemDialogFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MESSAGE, deleteMsg);
         args.putString(ARG_TAG, tag);
-        args.putString(ARG_RECIPE_ID, recipeId);
+        args.putParcelable(ARG_RECIPE_ID, recipe);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,7 +72,7 @@ public class ItemDialogFragment extends DialogFragment {
         if (getArguments() != null) {
             deleteMsg = getArguments().getString(ARG_MESSAGE);
             tag = getArguments().getString(ARG_TAG);
-            recipeId = getArguments().getString(ARG_RECIPE_ID);
+            recipe = getArguments().getParcelable(ARG_RECIPE_ID);
         }
     }
 
@@ -91,8 +92,8 @@ public class ItemDialogFragment extends DialogFragment {
                     Toast.makeText(requireActivity(), "Logout successfully", LENGTH_SHORT).show();
                     listener.onIntentListener(DIALOG_LOGOUT_TAG);
                 }
-                else if (tag.equals(DIALOG_RECIPE_TAG) && recipeId != null && !recipeId.isEmpty()){
-                    recipeViewModel.deleteRecipe(recipeId, task -> {
+                else if (tag.equals(DIALOG_RECIPE_TAG) && recipe != null){
+                    recipeViewModel.deleteRecipe(recipe, task -> {
                         if (task.isSuccessful()) {
                             Context context = getContext(); // or getActivity()
                             if (context != null) {

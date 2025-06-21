@@ -3,42 +3,42 @@ package com.ucas.firebaseminiproject.data.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
 import java.util.List;
 
-public class Recipe implements Parcelable {
+public class Recipe implements Parcelable{
     private String recipeId;
     private String imageUrl;
     private String videoUrl;
     private String publisherId;
     private String publisherName;
     private String publisherImage;
-    private boolean isSaved;
     private long likesCount;
     private List<String> categories;
     private String title;
     private String steps;
     private String Ingredients;
+    private Date createAt;
 
 
     public Recipe() {
         // Required empty constructor for Firebase
     }
 
-    public Recipe(String imageUrl, String videoUrl, String publisherName, String publisherImage, boolean isSaved, int likesCount, List<String> categories, String description) {
+    public Recipe(String imageUrl, String videoUrl, String publisherName, String publisherImage, int likesCount, List<String> categories, String description) {
         this.imageUrl = imageUrl;
         this.videoUrl = videoUrl;
         this.publisherName = publisherName;
         this.publisherImage = publisherImage;
-        this.isSaved = isSaved;
+
         this.likesCount = likesCount;
         this.categories = categories;
         this.title = description;
     }
 
-    public Recipe(String videoUrl, String publisherName, boolean isSaved, int likesCount, List<String> categories, String description) {
+    public Recipe(String videoUrl, String publisherName, int likesCount, List<String> categories, String description) {
         this.videoUrl = videoUrl;
         this.publisherName = publisherName;
-        this.isSaved = isSaved;
         this.likesCount = likesCount;
         this.categories = categories;
         this.title = description;
@@ -51,8 +51,7 @@ public class Recipe implements Parcelable {
         publisherId = in.readString();
         publisherName = in.readString();
         publisherImage = in.readString();
-        isSaved = in.readByte() != 0;
-        likesCount = in.readInt();
+        likesCount = in.readLong();
         categories = in.createStringArrayList();
         title = in.readString();
         steps = in.readString();
@@ -67,7 +66,6 @@ public class Recipe implements Parcelable {
         dest.writeString(publisherId);
         dest.writeString(publisherName);
         dest.writeString(publisherImage);
-        dest.writeByte((byte) (isSaved ? 1 : 0));
         dest.writeLong(likesCount);
         dest.writeStringList(categories);
         dest.writeString(title);
@@ -124,14 +122,6 @@ public class Recipe implements Parcelable {
         this.publisherImage = publisherImage;
     }
 
-    public boolean isSaved() {
-        return isSaved;
-    }
-
-    public void setSaved(boolean saved) {
-        isSaved = saved;
-    }
-
     public long getLikesCount() {
         return likesCount;
     }
@@ -186,5 +176,13 @@ public class Recipe implements Parcelable {
 
     public void setPublisherId(String publisherId) {
         this.publisherId = publisherId;
+    }
+
+    public Date getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(Date createAt) {
+        this.createAt = createAt;
     }
 }

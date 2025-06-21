@@ -11,8 +11,8 @@ import java.util.Map;
 public class ProfileViewModel extends ViewModel {
     ProfileRepository repository = new ProfileRepository();
 
-    public void getRecipesByUserId(OnFirebaseLoadedListener.OnRecipesLoaded loaded){
-        repository.getRecipesByUserId(loaded);
+    public void getRecipesByUserId(String userId,OnFirebaseLoadedListener.OnRecipesLoaded loaded){
+        repository.getRecipesByUserId(userId, loaded);
     }
 
     public void getCurrentUserInfo(OnFirebaseLoadedListener.OnUserInfoLoadedListener listener){
@@ -23,7 +23,7 @@ public class ProfileViewModel extends ViewModel {
         repository.getUserInfoById(userId, listener);
     }
     public void updateUserInfo(String userId, Map<String, String> userInfo, OnCompleteListener<Void> listener){
-        repository.updateUserInf(userId, userInfo, listener);
+        repository.updateUserInfo(userId, userInfo, listener);
     }
 
     public void toggleSaveRecipe(String recipeId, OnFirebaseLoadedListener.OnSaveRecipeLoadedListener listener){
@@ -36,5 +36,9 @@ public class ProfileViewModel extends ViewModel {
 
     public void getSavedRecipes(OnFirebaseLoadedListener.OnRecipesLoaded listener){
         repository.getSavedRecipes(listener);
+    }
+
+    public void getTopCreators(int minCount, OnFirebaseLoadedListener.OnUsersInfoLoadedListener listener){
+        repository.getTopCreators(minCount, listener);
     }
 }

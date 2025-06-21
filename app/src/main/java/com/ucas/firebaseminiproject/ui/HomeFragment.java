@@ -1,7 +1,10 @@
 package com.ucas.firebaseminiproject.ui;
 
+import static android.view.View.GONE;
 import static com.ucas.firebaseminiproject.utilities.Constance.ADD_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
+import static com.ucas.firebaseminiproject.utilities.Constance.USER_TAG;
+import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declareRecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -17,9 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentHomeBinding;
 import com.ucas.firebaseminiproject.ui.adapters.FragmentAdapter;
+import com.ucas.firebaseminiproject.ui.adapters.UserAdapter;
 import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
 import java.util.ArrayList;
@@ -29,7 +34,7 @@ import java.util.ArrayList;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements OnItemListener.OnUserListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -42,6 +47,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private OnItemListener.OnFragmentListener listener;
     private RecipeViewModel recipeViewModel;
+    private ProfileViewModel profileViewModel;
     private ArrayList<String> tabs = new ArrayList<>();
     private ArrayList<Fragment> fragments = new ArrayList<>();
 
@@ -87,8 +93,15 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         recipeViewModel = new ViewModelProvider(requireActivity()).get(RecipeViewModel.class);
-        tabs.add("ALL");
-        fragments.add(RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, "all"));
+        profileViewModel = new ViewModelProvider(requireActivity()).get(ProfileViewModel.class);
+
+
+        profileViewModel.getTopCreators(3, userInfo -> {
+            if (userInfo != null && !userInfo.isEmpty())
+                declareRecyclerView(requireContext(), new UserAdapter(userInfo, HomeFragment.this), binding.rvUsers, true);
+            //else
+               // binding.rvUsers.setVisibility(GONE);
+        });
 
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -111,6 +124,8 @@ public class HomeFragment extends Fragment {
 
 
         recipeViewModel.getAllCategories(categories -> {
+            tabs.add("ALL");
+            fragments.add(RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, "all"));
             for (String category: categories) {
                 tabs.add(category);
                 fragments.add(RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, category.toLowerCase()));
@@ -143,4 +158,9 @@ public class HomeFragment extends Fragment {
     }
 
 
+    @Override
+    public void onUserClicked(String userId) {
+        if (userId != null && !userId.isEmpty())
+            listener.onNavigateToUserProfile(USER_TAG, userId);
+    }
 }

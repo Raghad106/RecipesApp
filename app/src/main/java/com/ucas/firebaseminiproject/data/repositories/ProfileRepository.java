@@ -5,19 +5,19 @@ import static com.ucas.firebaseminiproject.utilities.Constance.EMAIL_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.RECIPES_COUNT;
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.SAVED_RECIPES_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
@@ -33,24 +33,26 @@ public class ProfileRepository {
     FirebaseAuth auth =FirebaseAuth.getInstance();
     RecipeRepository recipeRepository = new RecipeRepository();
 
-    public void getRecipesByUserId(OnFirebaseLoadedListener.OnRecipesLoaded loaded){
-        this.getCurrentUserInfo(userInfo -> {
-            if (!userInfo.isEmpty())
-                firestore.collection(RECIPE_COLLECTION).whereEqualTo("publisherId", userInfo.get(ID_MAP_KEY)).get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()){
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        List<Recipe> userRecipes = task.getResult().toObjects(Recipe.class);
-                        for (Recipe recipe: userRecipes){
-                            recipe.setPublisherImage(userInfo.get(IMAGE_MAP_KEY));
-                            recipe.setPublisherName(userInfo.get(NAME_MAP_KEY));
+    // My recipes case
+    public void getRecipesByUserId(String userId, OnFirebaseLoadedListener.OnRecipesLoaded loaded){
+        if (userId != null && !userId.isEmpty()){
+            this.getUserInfoById(userId, userInfo -> {
+                firestore.collection(RECIPE_COLLECTION).whereEqualTo("publisherId", userId).get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            List<Recipe> userRecipes = task.getResult().toObjects(Recipe.class);
+                            for (Recipe recipe: userRecipes){
+                                recipe.setPublisherImage(userInfo.get(IMAGE_MAP_KEY));
+                                recipe.setPublisherName(userInfo.get(NAME_MAP_KEY));
+                            }
+                            loaded.onRecipeLoaded(userRecipes);
+                        } else {
+                            loaded.onRecipeLoaded(Collections.emptyList()); // return empty list on failure
                         }
-                        loaded.onRecipeLoaded(userRecipes);
-                    } else {
-                        loaded.onRecipeLoaded(Collections.emptyList()); // return empty list on failure
                     }
-                }
+                });
             });
-        });
+        }
     }
 
     public void getCurrentUserInfo(OnFirebaseLoadedListener.OnUserInfoLoadedListener listener) {
@@ -77,6 +79,9 @@ public class ProfileRepository {
         }
     }
 
+
+
+
     public void getUserInfoById(String userId, OnFirebaseLoadedListener.OnUserInfoLoadedListener listener) {
         Map<String, String> userInfo = new HashMap<>();
 
@@ -87,8 +92,12 @@ public class ProfileRepository {
                         if (task.isSuccessful() && task.getResult() != null) {
                             userInfo.put(ID_MAP_KEY, userId);
                             String name = task.getResult().getString(NAME_MAP_KEY);
+                            String email = task.getResult().getString(EMAIL_MAP_KEY);
+                            String country = task.getResult().getString(COUNTRY_MAP_KEY);
                             String userImage = task.getResult().getString(IMAGE_MAP_KEY);
                             userInfo.put(NAME_MAP_KEY, name != null ? name : "Unknown");
+                            userInfo.put(EMAIL_MAP_KEY, email != null ? email : "");
+                            userInfo.put(COUNTRY_MAP_KEY, country != null ? country : "");
                             userInfo.put(IMAGE_MAP_KEY, userImage != null ? userImage : "");
                             listener.onUserInfoLoaded(userInfo);
                         } else {
@@ -100,7 +109,7 @@ public class ProfileRepository {
         }
     }
 
-    public void updateUserInf(String userId, Map<String, String> userInfo, OnCompleteListener<Void> listener){
+    public void updateUserInfo(String userId, Map<String, String> userInfo, OnCompleteListener<Void> listener){
         if (userInfo != null && !userInfo.isEmpty())
             firestore.collection(USERS_COLLECTION).document(userId).set(userInfo, SetOptions.merge()).addOnCompleteListener(listener);
     }
@@ -198,7 +207,7 @@ public class ProfileRepository {
 
                         // Fetch all recipes one by one
                         for (String recipeId : recipeIds) {
-                            recipeRepository.getRecipeByRecipeId(recipeId, userId, recipe -> {
+                            recipeRepository.getRecipeByRecipeId(recipeId, recipe -> {
                                 if (recipe != null) recipes.add(recipe);
 
                                 // Once all recipes are loaded, return them
@@ -209,6 +218,30 @@ public class ProfileRepository {
                         }
                     });
         });
+    }
+
+    public void getTopCreators(int minCount, OnFirebaseLoadedListener.OnUsersInfoLoadedListener listener) {
+        firestore.collection(USERS_COLLECTION)
+                .whereGreaterThanOrEqualTo(RECIPES_COUNT, minCount)
+                .orderBy(RECIPES_COUNT, Query.Direction.DESCENDING)
+                .limit(10) // LIMIT TO 3 USERS ONLY
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<Map<String, String>> topUsers = new ArrayList<>();
+                        for (DocumentSnapshot doc : task.getResult()) {
+                            Map<String, String> user = new HashMap<>();
+                            user.put(ID_MAP_KEY, doc.getId());
+                            user.put(NAME_MAP_KEY, doc.getString(NAME_MAP_KEY));
+                            user.put(IMAGE_MAP_KEY, doc.getString(IMAGE_MAP_KEY));
+                            user.put(RECIPES_COUNT, String.valueOf(doc.getLong(RECIPES_COUNT)));
+                            topUsers.add(user);
+                        }
+                        listener.onUsersInfoLoaded(topUsers);
+                    } else {
+                        listener.onUsersInfoLoaded(new ArrayList<>());
+                    }
+                });
     }
 
 }

@@ -1,11 +1,12 @@
 package com.ucas.firebaseminiproject.ui;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.ADD_RECIPE_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.CURRENT_USER_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.DIALOG_LOGOUT_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.DIALOG_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.EDIT_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.HOME_TAG;
-import static com.ucas.firebaseminiproject.utilities.Constance.MY_RECIPE_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.SAVED_RECIPE_TAG;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,9 +40,9 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
             if (item.getItemId() == R.id.home) {
                 navigateFragment(new HomeFragment());
             } else if (item.getItemId() == R.id.account) {
-                navigateFragment(new ProfileFragment());
+                navigateFragment(ProfileFragment.newInstance(CURRENT_USER_TAG));
             } else if (item.getItemId() == R.id.myRecipe) {
-                navigateFragment(RecyclerViewFragment.newInstance(MY_RECIPE_TAG));
+                navigateFragment(RecyclerViewFragment.newInstance(SAVED_RECIPE_TAG));
             }
             return true;
         });
@@ -65,6 +66,10 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
             DialogFragment dialog = ItemDialogFragment.newInstance("Are you sure, do you want logout", DIALOG_LOGOUT_TAG);
             dialog.show(getSupportFragmentManager(), DIALOG_LOGOUT_TAG);
         }
+        if (tag.equals(CURRENT_USER_TAG)){
+            navigateFragment(ProfileFragment.newInstance(CURRENT_USER_TAG));
+            binding.bottomNavigation.setSelectedItemId(R.id.account);
+        }
     }
 
     @Override
@@ -75,11 +80,17 @@ public class MainActivity extends AppCompatActivity implements OnItemListener.On
     }
 
     @Override
-    public void onDeleteRecipe(String tag, String recipeId) {
-        if (tag.equals(DIALOG_RECIPE_TAG) && recipeId != null && !recipeId.isEmpty()){
-            DialogFragment dialog = ItemDialogFragment.newInstance("Are you sure, do you want delete this recipe", DIALOG_RECIPE_TAG, recipeId);
+    public void onDeleteRecipe(String tag, Recipe recipe) {
+        if (tag.equals(DIALOG_RECIPE_TAG) && recipe != null){
+            DialogFragment dialog = ItemDialogFragment.newInstance("Are you sure, do you want delete this recipe", DIALOG_RECIPE_TAG, recipe);
             dialog.show(getSupportFragmentManager(), DIALOG_RECIPE_TAG);
         }
+    }
+
+    @Override
+    public void onNavigateToUserProfile(String tag, String userId) {
+        if (tag != null && userId != null && !userId.isEmpty())
+            navigateFragment(ProfileFragment.newInstance(tag, userId));
     }
 
     @Override

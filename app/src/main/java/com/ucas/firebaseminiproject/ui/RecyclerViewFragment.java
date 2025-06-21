@@ -1,26 +1,25 @@
 package com.ucas.firebaseminiproject.ui;
 
-import static android.widget.Toast.LENGTH_SHORT;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
-import static com.ucas.firebaseminiproject.utilities.Constance.MY_RECIPE_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.CURRENT_USER_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.SAVED_RECIPE_TAG;
+import static com.ucas.firebaseminiproject.utilities.Constance.USER_TAG;
 import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declareRecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.ucas.firebaseminiproject.data.models.Recipe;
-import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentRecyclerViewBinding;
@@ -107,7 +106,7 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
                     if (category.equals("all")) {
                         recipeViewModel.getAllRecipes(recipes -> {
                             originalRecipes = recipes;
-                            adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
+                            adapter = new RecipeAdapter(RecyclerViewFragment.this, recipes);
                             declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
                         });
                     }
@@ -122,7 +121,9 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
                 }
 
             }
-            else if (tag.equals(MY_RECIPE_TAG)){
+
+
+            else if (tag.equals(SAVED_RECIPE_TAG)){
                 profileViewModel.getSavedRecipes(recipes -> {
                     declareRecyclerView(requireContext(), new RecipeAdapter(RecyclerViewFragment.this, recipes), binding.rvItems, false);
                 });
@@ -134,6 +135,18 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
     @Override
     public void onLayoutClicked(String recipeId, String userId) {
         listener.onNavigateRecipeDetailsFragment(recipeId, userId);
+    }
+
+    @Override
+    public void onUserClicked(String userId) {
+        if (userId != null && !userId.isEmpty()){
+            profileViewModel.getCurrentUserInfo(userInfo -> {
+                if (userInfo.get(ID_MAP_KEY).equals(userId))
+                    listener.onNavigateFragments(CURRENT_USER_TAG);
+                else
+                    listener.onNavigateToUserProfile(USER_TAG, userId);
+            });
+        }
     }
 
     @Override

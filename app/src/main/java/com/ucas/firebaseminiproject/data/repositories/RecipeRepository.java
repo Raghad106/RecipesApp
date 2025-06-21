@@ -2,9 +2,11 @@ package com.ucas.firebaseminiproject.data.repositories;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_NAME;
+import static com.ucas.firebaseminiproject.utilities.Constance.CREATE_AT;
 import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.LIKES_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
+import static com.ucas.firebaseminiproject.utilities.Constance.RECIPES_COUNT;
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_ID;
 import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
@@ -21,6 +23,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.ucas.firebaseminiproject.data.models.Recipe;
@@ -35,6 +38,7 @@ import java.util.Map;
 public class RecipeRepository {
     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
+    // Add an new category to firebase
     public void createCategory(Map<String, String> category, OnCompleteListener<Void> listener) {
         String categoryName = category.get(CATEGORY_NAME).toLowerCase();
 
@@ -62,7 +66,18 @@ public class RecipeRepository {
         firestore.collection(CATEGORY_COLLECTION).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (DocumentSnapshot doc : task.getResult()) {
-                    categories.add(doc.getId().toLowerCase());
+                    List<String> recipeIds = (List<String>) doc.get(RECIPE_ID);
+
+                    if (recipeIds != null && !recipeIds.isEmpty()) {
+                        categories.add(doc.getId().toLowerCase());
+                    }else {
+                        // To delete empty category because
+                        firestore.collection(CATEGORY_COLLECTION).document(doc.getId()).delete().addOnCompleteListener(task1 -> {
+                            if (task.isSuccessful()){
+                                Log.d("CategoryCleanup", "Deleted empty category: " + doc.getId());
+                            }
+                        });
+                    }
                 }
                 listener.onCategoriesLoaded(categories);
             } else
@@ -91,6 +106,15 @@ public class RecipeRepository {
                 .set(recipe);
         tasks.add(globalTask);
 
+        Map<String, Object> update = new HashMap<>();
+        update.put(CREATE_AT, FieldValue.serverTimestamp());
+
+
+        Task<Void> timeTask = firestore.collection(RECIPE_COLLECTION)
+                .document(recipeId)
+                .update(update);
+        tasks.add(timeTask);
+
         // Save recipeId in each category's recipeIds array
         for (String categoryId : limitedCategories) {
             Map<String, Object> data = new HashMap<>();
@@ -112,7 +136,10 @@ public class RecipeRepository {
                 }
             }
 
-            if (allSuccessful) {
+            if (allSuccessful){
+                firestore.collection(USERS_COLLECTION)
+                        .document(recipe.getPublisherId())
+                        .update(RECIPES_COUNT, FieldValue.increment(1));
                 listener.onComplete(Tasks.forResult(null));
             } else {
                 listener.onComplete(Tasks.forException(new Exception("One or more tasks failed.")));
@@ -171,11 +198,11 @@ public class RecipeRepository {
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public void getAllRecipes(OnFirebaseLoadedListener.OnRecipesLoaded listener) {
         List<Recipe> recipes = new ArrayList<>();
 
         firestore.collection(RECIPE_COLLECTION)
+                .orderBy(CREATE_AT, Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -201,7 +228,7 @@ public class RecipeRepository {
                                 recipe.setPublisherImage(userDoc.getString(IMAGE_MAP_KEY)); // ← you wrote setPublisherName again
                                 recipes.add(recipe);
                             }
-                            listener.onRecipeLoaded(recipes.reversed());
+                            listener.onRecipeLoaded(recipes);
 
                         }).addOnFailureListener(e -> {
                             listener.onRecipeLoaded(new ArrayList<>());
@@ -213,6 +240,7 @@ public class RecipeRepository {
                 });
     }
 
+    // Tab case
     public void getRecipesByCategoryName(String categoryId, OnFirebaseLoadedListener.OnRecipesLoaded listener){
         List<Recipe> recipes = new ArrayList<>();
         firestore.collection(CATEGORY_COLLECTION).document(categoryId.toLowerCase()).get().addOnCompleteListener(task -> {
@@ -240,17 +268,30 @@ public class RecipeRepository {
                             userTasks.add(oneUerTask);
                         }
                     }
+                    tempRecipes.sort((r1, r2) -> {
+                        if (r1.getCreateAt() == null || r2.getCreateAt() == null) return 0;
+                        return r2.getCreateAt().compareTo(r1.getCreateAt());
+                    });
                     Tasks.whenAllSuccess(userTasks).addOnSuccessListener(userResults -> {
-                        for (int i = 0; i < userResults.size(); i++) {
-                            DocumentSnapshot userDoc = (DocumentSnapshot) userResults.get(i);
-                            Recipe recipe = tempRecipes.get(i);
-                            recipe.setPublisherName(userDoc.getString(NAME_MAP_KEY));
-                            recipe.setPublisherImage(userDoc.getString(IMAGE_MAP_KEY)); // Make sure this is a real method
+                        // Build a map from userId → user document
+                        Map<String, DocumentSnapshot> userMap = new HashMap<>();
+                        for (Object userObj : userResults) {
+                            DocumentSnapshot userDoc = (DocumentSnapshot) userObj;
+                            userMap.put(userDoc.getId(), userDoc);
+                        }
+
+                        for (Recipe recipe : tempRecipes) {
+                            DocumentSnapshot userDoc = userMap.get(recipe.getPublisherId());
+                            if (userDoc != null) {
+                                recipe.setPublisherName(userDoc.getString(NAME_MAP_KEY));
+                                recipe.setPublisherImage(userDoc.getString(IMAGE_MAP_KEY));
+                            }
                             recipes.add(recipe);
                         }
 
                         listener.onRecipeLoaded(recipes);
                     });
+
                 }).addOnFailureListener(e -> {
                     listener.onRecipeLoaded(new ArrayList<>());
                     Log.e("Firestore", "Error fetching recipes by category", e);
@@ -262,11 +303,13 @@ public class RecipeRepository {
         });
     }
 
-    public void getRecipeByRecipeId(String recipeId, String userId, OnFirebaseLoadedListener.OnRecipeLoaded listener){
+    // Recipe's details
+    public void getRecipeByRecipeId(String recipeId, OnFirebaseLoadedListener.OnRecipeLoaded listener){
         firestore.collection(RECIPE_COLLECTION).document(recipeId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
                 Recipe recipe = task.getResult().toObject(Recipe.class);
-                firestore.collection(USERS_COLLECTION).document(userId).get().addOnCompleteListener(task1 -> {
+                String publisherId = recipe.getPublisherId();
+                firestore.collection(USERS_COLLECTION).document(publisherId).get().addOnCompleteListener(task1 -> {
                     if (task1.isSuccessful()){
                         if (recipe != null){
                             recipe.setPublisherName(task1.getResult().getString(NAME_MAP_KEY));
@@ -279,10 +322,40 @@ public class RecipeRepository {
         });
     }
 
-    public void deleteRecipe(String recipeId, OnCompleteListener<Void> listener){
-        if (recipeId != null && !recipeId.isEmpty())
-            firestore.collection(RECIPE_COLLECTION).document(recipeId).delete().addOnCompleteListener(listener);
+    public void deleteRecipe(Recipe recipe, OnCompleteListener<Void> listener) {
+        if (recipe.getRecipeId() == null || recipe.getRecipeId().isEmpty()) {
+            return;
+        }
+
+        List<Task<Void>> updateTasks = new ArrayList<>();
+
+        for (String category : recipe.getCategories()) {
+            DocumentReference categoryRef = firestore.collection(CATEGORY_COLLECTION).document(category.toLowerCase());
+
+            // Remove the recipe ID from the category document
+            Task<Void> updateTask = categoryRef.update(RECIPE_ID, FieldValue.arrayRemove(recipe.getRecipeId()));
+            updateTasks.add(updateTask);
+        }
+
+        // After removing from all categories, delete the recipe itself
+        Tasks.whenAll(updateTasks).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                firestore.collection(RECIPE_COLLECTION)
+                        .document(recipe.getRecipeId())
+                        .delete()
+                        .addOnCompleteListener(task1 -> {
+                            firestore.collection(USERS_COLLECTION)
+                                    .document(recipe.getPublisherId())
+                                    .update(RECIPES_COUNT, FieldValue.increment(-1));
+                            listener.onComplete(task1);
+                        });
+            } else {
+                listener.onComplete(Tasks.forException(new Exception("Failed to remove recipe from categories.")));
+            }
+        });
     }
+
+
 
     public void toggleLike(String recipeId, String userId, OnFirebaseLoadedListener.OnLikeLoadedListener listener) {
         DocumentReference likeDocRef = firestore

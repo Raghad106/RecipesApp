@@ -36,12 +36,12 @@ public class RecipeViewModel extends ViewModel {
         repository.getRecipesByCategoryName(categoryId, listener);
     }
 
-    public void getRecipeByRecipeId(String recipeId, String userId, OnFirebaseLoadedListener.OnRecipeLoaded listener){
-        repository.getRecipeByRecipeId(recipeId, userId, listener);
+    public void getRecipeByRecipeId(String recipeId, OnFirebaseLoadedListener.OnRecipeLoaded listener){
+        repository.getRecipeByRecipeId(recipeId, listener);
     }
 
-    public void deleteRecipe(String recipeId, OnCompleteListener<Void> listener){
-        repository.deleteRecipe(recipeId, listener);
+    public void deleteRecipe(Recipe recipe, OnCompleteListener<Void> listener){
+        repository.deleteRecipe(recipe, listener);
     }
 
     public void toggleLike(String recipeId, String userId, OnFirebaseLoadedListener.OnLikeLoadedListener listener){

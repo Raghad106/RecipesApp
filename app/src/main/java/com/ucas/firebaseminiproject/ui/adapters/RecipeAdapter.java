@@ -16,7 +16,9 @@ import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.databinding.ItemRecipeBinding;
 import com.ucas.firebaseminiproject.utilities.OnItemListener;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHolder> {
     List<Recipe> recipes;
@@ -53,27 +55,43 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
         recipeHolder.username.setText(recipe.getPublisherName());
         recipeHolder.description.setText(recipe.getTitle().toUpperCase());
         recipeHolder.likesCounts.setText("Loved By "+recipe.getLikesCount());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        String formatted = sdf.format(recipe.getCreateAt());
+        recipeHolder.time.setText(formatted);
+
         if (recipe.getPublisherImage() != null && !recipe.getPublisherImage().isEmpty())
             Picasso.get().load(recipe.getPublisherImage()).into(recipeHolder.accountImage);
 
         if (recipe.getImageUrl() != null && !recipe.getImageUrl().isEmpty())
             Picasso.get().load(recipe.getImageUrl()).into(recipeHolder.recipeImage);
 
-        if (recipe.getCategories().size() == 1){
-            recipeHolder.category1.setText(recipe.getCategories().get(0));
-        } else if (recipe.getCategories().size() == 2) {
-            recipeHolder.category1.setText(recipe.getCategories().get(0));
-            recipeHolder.category2.setText(recipe.getCategories().get(1));
-            recipeHolder.category2.setVisibility(ViewGroup.VISIBLE);
-        } else if (recipe.getCategories().size() == 3) {
-            recipeHolder.category1.setText(recipe.getCategories().get(0));
-            recipeHolder.category2.setText(recipe.getCategories().get(1));
-            recipeHolder.category3.setText(recipe.getCategories().get(2));
-            recipeHolder.category2.setVisibility(ViewGroup.VISIBLE);
-            recipeHolder.category3.setVisibility(ViewGroup.VISIBLE);
+        // Reset all category views
+        recipeHolder.category1.setText("");
+        recipeHolder.category2.setText("");
+        recipeHolder.category3.setText("");
+        recipeHolder.category2.setVisibility(ViewGroup.GONE);
+        recipeHolder.category3.setVisibility(ViewGroup.GONE);
+
+// Set category views based on size
+        List<String> categories = recipe.getCategories();
+        if (categories != null && !categories.isEmpty()) {
+            if (categories.size() >= 1) {
+                recipeHolder.category1.setText(categories.get(0));
+            }
+            if (categories.size() >= 2) {
+                recipeHolder.category2.setText(categories.get(1));
+                recipeHolder.category2.setVisibility(ViewGroup.VISIBLE);
+            }
+            if (categories.size() >= 3) {
+                recipeHolder.category3.setText(categories.get(2));
+                recipeHolder.category3.setVisibility(ViewGroup.VISIBLE);
+            }
         }
 
-
+        recipeHolder.username.setOnClickListener(view -> {
+            listener.onUserClicked(recipe.getPublisherId());
+        });
         recipeHolder.playIcon.setOnClickListener(view -> {
             listener.onVideoClicked(recipe.getVideoUrl());
         });
@@ -93,7 +111,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
         ImageButton playIcon;
         CardView layout;
         ImageView accountImage, recipeImage;
-        TextView username, description, category1, category2, category3, likesCounts;
+        TextView username, description, category1, category2, category3, likesCounts, time;
         public RecipeHolder(@NonNull ItemRecipeBinding binding) {
             super(binding.getRoot());
             playIcon = binding.btnPlayVideo;
@@ -105,6 +123,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHold
             category2 = binding.tvCategory2;
             category3 = binding.tvCategory3;
             likesCounts = binding.tvLikesCount;
+            time = binding.tvDuration;
             layout = binding.layout;
         }
     }

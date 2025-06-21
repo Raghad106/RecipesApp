@@ -82,16 +82,16 @@
             <!-- Recipe Title -->
             <TextView
                 android:id="@+id/tvTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Recipe Title"
                 android:textColor="@color/orange_700"
                 android:textSize="22sp"
                 android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/ivLike"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <!-- Like Icon -->
             <ImageView

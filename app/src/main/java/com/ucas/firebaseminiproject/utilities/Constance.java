@@ -27,14 +27,19 @@ public interface Constance {
 
     String CATEGORY_NAME = "Cat Name";
     String RECIPE_ID = "Recipe Ids";
+    String CREATE_AT = "createAt";
+    String RECIPES_COUNT = "Recipes count";
 
     // Fragment Tags
     String ADD_RECIPE_TAG = "New Recipe Fragment";
     String EDIT_RECIPE_TAG = "Edit a Recipe Fragment";
     String HOME_TAG = "Home Fragment";
-    String MY_RECIPE_TAG = "My recipe Fragment";
+    String SAVED_RECIPE_TAG = "My recipe Fragment";
     String DIALOG_LOGOUT_TAG = "Dialog Logout Fragment";
     String DIALOG_RECIPE_TAG = "Dialog Recipe Fragment";
+    String CURRENT_USER_TAG = "My Profile Fragment";
+    String USER_TAG = "Users Profile Fragment";
+
 
     // Method Tags
     String ADD_CATEGORY_TAG = "add category";

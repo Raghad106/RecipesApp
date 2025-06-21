@@ -24,11 +24,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AuthRepository {
-    //test if I can but here or I need to put in method
-
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
+    // for adding a new user
     public void register(Map<String, Object> userData, OnCompleteListener<Void> listener) {
         String email = (String) userData.get(EMAIL_MAP_KEY);
         String password = (String) userData.get(PASSWORD_MAP_KEY);
@@ -48,15 +47,18 @@ public class AuthRepository {
                 return;
             }
 
+            // for saving user's private information
             userData.remove(PASSWORD_MAP_KEY);
             firestore.collection(USERS_COLLECTION).document(uid).set(userData).addOnCompleteListener(listener);
         });
     }
 
+    // for entering ti app
     public void login(String email, String password, OnCompleteListener<AuthResult> listener) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(listener);
     }
 
+    // Remember me case (change value in login activity)
     public void saveRememberInfo(Context context, Boolean isRememberMe) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -64,6 +66,7 @@ public class AuthRepository {
         editor.apply();
     }
 
+    // Remember me case (get value in splash screen)
     public boolean getRememberInfo(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         return prefs.getBoolean(IS_REMEMBERED_KEY, false);
