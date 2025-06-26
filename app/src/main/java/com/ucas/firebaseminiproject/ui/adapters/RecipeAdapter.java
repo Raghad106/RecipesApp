@@ -1,6 +1,5 @@
 package com.ucas.firebaseminiproject.ui.adapters;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -23,16 +22,10 @@ import java.util.Locale;
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeHolder> {
     List<Recipe> recipes;
     OnItemListener.OnRecipeListener listener;
-    boolean isSaved = false;
 
     public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipes) {
         this.listener = listener;
         this.recipes = recipes;
-    }
-    public RecipeAdapter(OnItemListener.OnRecipeListener listener, List<Recipe> recipe, boolean isSaved) {
-        this.listener = listener;
-        this.recipes = recipes;
-        this.isSaved = isSaved;
     }
 
     public void updateList(List<Recipe> newList) {

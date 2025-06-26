@@ -1,16 +1,10 @@
 package com.ucas.firebaseminiproject.utilities;
 
-import static com.ucas.firebaseminiproject.utilities.Constance.CAMERA_PERMISSION;
-import static com.ucas.firebaseminiproject.utilities.Constance.STORAGE_PERMISSION;
-
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.text.InputType;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 

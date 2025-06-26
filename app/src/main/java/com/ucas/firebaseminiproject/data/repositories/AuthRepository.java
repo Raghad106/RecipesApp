@@ -1,10 +1,7 @@
 package com.ucas.firebaseminiproject.data.repositories;
 
 import static com.ucas.firebaseminiproject.utilities.Constance.EMAIL_MAP_KEY;
-import static com.ucas.firebaseminiproject.utilities.Constance.ID_MAP_KEY;
-import static com.ucas.firebaseminiproject.utilities.Constance.IMAGE_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.IS_REMEMBERED_KEY;
-import static com.ucas.firebaseminiproject.utilities.Constance.NAME_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.PASSWORD_MAP_KEY;
 import static com.ucas.firebaseminiproject.utilities.Constance.SHARED_PREFERENCES_NAME;
 import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
@@ -16,11 +13,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class AuthRepository {

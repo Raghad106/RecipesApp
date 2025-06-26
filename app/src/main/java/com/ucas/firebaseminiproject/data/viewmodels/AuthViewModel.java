@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.AuthResult;
 import com.ucas.firebaseminiproject.data.repositories.AuthRepository;
-import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
 
 import java.util.Map;
 

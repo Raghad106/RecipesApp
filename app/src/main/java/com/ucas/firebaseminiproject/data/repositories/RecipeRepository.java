@@ -11,10 +11,7 @@ import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_COLLECTION
 import static com.ucas.firebaseminiproject.utilities.Constance.RECIPE_ID;
 import static com.ucas.firebaseminiproject.utilities.Constance.USERS_COLLECTION;
 
-import android.os.Build;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -24,12 +21,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.utilities.OnFirebaseLoadedListener;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

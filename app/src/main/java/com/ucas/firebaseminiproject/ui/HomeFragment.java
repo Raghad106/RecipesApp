@@ -1,6 +1,5 @@
 package com.ucas.firebaseminiproject.ui;
 
-import static android.view.View.GONE;
 import static com.ucas.firebaseminiproject.utilities.Constance.ADD_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.CATEGORY_COLLECTION;
 import static com.ucas.firebaseminiproject.utilities.Constance.USER_TAG;
@@ -8,16 +7,15 @@ import static com.ucas.firebaseminiproject.utilities.ViewsCustomListeners.declar
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;

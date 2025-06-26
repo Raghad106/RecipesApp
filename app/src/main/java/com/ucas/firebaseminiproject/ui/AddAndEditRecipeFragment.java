@@ -28,7 +28,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.squareup.picasso.Picasso;
 import com.ucas.firebaseminiproject.data.models.Recipe;
 import com.ucas.firebaseminiproject.data.uplodeImage.CloudinaryHelper;
-import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentAddRecipeBinding;

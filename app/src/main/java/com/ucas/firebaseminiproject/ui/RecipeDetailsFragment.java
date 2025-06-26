@@ -2,7 +2,6 @@ package com.ucas.firebaseminiproject.ui;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-
 import static com.ucas.firebaseminiproject.utilities.Constance.CURRENT_USER_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.DIALOG_RECIPE_TAG;
 import static com.ucas.firebaseminiproject.utilities.Constance.EDIT_RECIPE_TAG;
@@ -15,19 +14,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.squareup.picasso.Picasso;
-import com.ucas.firebaseminiproject.data.viewmodels.AuthViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.ProfileViewModel;
 import com.ucas.firebaseminiproject.data.viewmodels.RecipeViewModel;
 import com.ucas.firebaseminiproject.databinding.FragmentRecipeDetailsBinding;
