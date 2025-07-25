@@ -44,6 +44,7 @@ public class HomeFragment extends Fragment implements OnItemListener.OnUserListe
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
+    private String name = "RAGHAD";
     private String mParam1;
     private String mParam2;
     private FragmentHomeBinding binding;
