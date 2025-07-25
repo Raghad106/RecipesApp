@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:background="@color/colorSurface"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -33,6 +35,7 @@
             android:textStyle="bold"
             android:textAlignment="center"
             android:layout_marginTop="16dp"
+            android:textColor="@color/colorText"
             app:layout_constraintTop_toBottomOf="@id/ivAppLogo"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -87,7 +90,7 @@
             android:id="@+id/tvErrorMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/red"
+            android:textColor="@color/colorError"
             android:textSize="14sp"
             android:layout_marginTop="16dp"
             android:clickable="true"
@@ -103,7 +106,7 @@
             android:layout_height="wrap_content"
             android:text="Remember me"
             android:layout_marginTop="8dp"
-            android:backgroundTint="@color/orange_700"
+            android:backgroundTint="@color/colorAccent"
             app:layout_constraintTop_toBottomOf="@id/frameLayout"
             app:layout_constraintStart_toStartOf="parent"/>
 
@@ -113,7 +116,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Login"
-            android:backgroundTint="@color/orange_500"
+            android:backgroundTint="@color/colorPrimaryDark"
             android:textColor="@android:color/white"
             android:padding="12dp"
             android:textSize="18sp"
@@ -128,7 +131,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Don't have an account? Register"
-            android:textColor="@color/orange_200"
+            android:textColor="@color/colorPrimary"
             android:textSize="14sp"
             android:layout_marginTop="16dp"
             android:clickable="true"

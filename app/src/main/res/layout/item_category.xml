@@ -15,7 +15,7 @@
         android:paddingHorizontal="20dp"
         android:gravity="center"
         android:text="Dessert"
-        android:textColor="@color/black"
+        android:textColor="@color/colorText"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "907543396648",
-    "project_id": "recipe-book-c287f",
-    "storage_bucket": "recipe-book-c287f.firebasestorage.app"
+    "project_number": "761951182926",
+    "project_id": "complete-recipe-app-69236",
+    "storage_bucket": "complete-recipe-app-69236.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:907543396648:android:929234d8dd796527aa501d",
+        "mobilesdk_app_id": "1:761951182926:android:a4a505d4df6422ce64631f",
         "android_client_info": {
-          "package_name": "com.ucas.firebaseminiproject"
+          "package_name": "com.ucas.firebaseminiprojectcomplete"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB7jhRfY1HlLVhLmBF_mbjxii0ngo0YLyw"
+          "current_key": "AIzaSyBtWu4xfZfYl2Y65XyNDFJGz0-hz7NAiH8"
         }
       ],
       "services": {

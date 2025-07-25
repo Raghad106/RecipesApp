@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.ucas.firebaseminiproject" />
-                  <option name="mobileSdkAppId" value="1:907543396648:android:929234d8dd796527aa501d" />
-                  <option name="projectId" value="recipe-book-c287f" />
-                  <option name="projectNumber" value="907543396648" />
+                  <option name="appId" value="com.ucas.firebaseminiprojectcomplete" />
+                  <option name="mobileSdkAppId" value="1:761951182926:android:a4a505d4df6422ce64631f" />
+                  <option name="projectId" value="complete-recipe-app-69236" />
+                  <option name="projectNumber" value="761951182926" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

@@ -46,7 +46,7 @@
         android:focusable="false"
         android:padding="4dp"
         android:text="John Doe"
-        android:textColor="@color/orange_500"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

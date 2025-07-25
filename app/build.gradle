@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.ucas.firebaseminiproject'
+    namespace 'com.ucas.firebaseminiprojectcomplete'
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.ucas.firebaseminiproject"
+        applicationId "com.ucas.firebaseminiprojectcomplete"
         minSdk 24
         targetSdk 35
         versionCode 1
