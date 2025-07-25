@@ -44,7 +44,6 @@ public class HomeFragment extends Fragment implements OnItemListener.OnUserListe
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String name = "RAGHAd";
     private String mParam1;
     private String mParam2;
     private FragmentHomeBinding binding;
@@ -99,13 +98,17 @@ public class HomeFragment extends Fragment implements OnItemListener.OnUserListe
         profileViewModel = new ViewModelProvider(requireActivity()).get(ProfileViewModel.class);
         FragmentAdapter adapter = new FragmentAdapter(requireActivity());
 
+        tabs.clear();
+        fragments.clear();
+        tabs.add("ALL");
+        fragments.add(RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, "all"));
+
         Log.d("GO_TO_HOME", requireContext().toString());
 
         profileViewModel.getTopCreators(3, userInfo -> {
             if (userInfo != null && !userInfo.isEmpty())
                 declareRecyclerView(requireContext(), new UserAdapter(userInfo, HomeFragment.this), binding.rvUsers, true);
-            //else
-               // binding.rvUsers.setVisibility(GONE);
+
         });
 
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -126,11 +129,13 @@ public class HomeFragment extends Fragment implements OnItemListener.OnUserListe
             search(""); // clear search
             return false;
         });
+
         recipeViewModel.getAllCategoriesPaginated(categories -> {
             tabs.clear();
             fragments.clear();
             tabs.add("ALL");
             fragments.add(RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, "all"));
+
             for (String category: categories) {
                 Log.d("CAT",category);
                 tabs.add(category);
@@ -151,10 +156,11 @@ public class HomeFragment extends Fragment implements OnItemListener.OnUserListe
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-
-                // Load more when user reaches the last loaded category
+                if (position == 0) { // "ALL" tab is first
+                    fragments.set(0, RecyclerViewFragment.newInstance(CATEGORY_COLLECTION, "all"));
+                }
+                // Existing pagination loading logic
                 if (position == adapter.getItemCount() - 1) {
-                    // Load next category page here
                     recipeViewModel.getAllCategoriesPaginated(newCategories -> {
                         List<Fragment> nextPageFragments = new ArrayList<>();
                         for (String category : newCategories) {
@@ -166,6 +172,7 @@ public class HomeFragment extends Fragment implements OnItemListener.OnUserListe
                 }
             }
         });
+
 
 
         binding.fab.setOnClickListener(view -> {

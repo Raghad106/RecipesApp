@@ -1,5 +1,7 @@
 package com.ucas.firebaseminiprojectcomplete.utilities;
 
+import android.Manifest;
+
 public interface Constance {
     // Shared preferences
     String IS_REMEMBERED_KEY = "is Remember";
@@ -36,5 +38,6 @@ public interface Constance {
     String USER_TAG = "Users Profile Fragment";
 
 
+    String INTERNET_PERMISSION = Manifest.permission.INTERNET;
 
 }

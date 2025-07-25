@@ -163,6 +163,7 @@ public class RecipeRepository {
             List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
             if (task.isSuccessful() && task.getResult()!=null){
                 List<DocumentSnapshot> docs = task.getResult().getDocuments();
+                Log.d("RECIPES_NUMBER", String.valueOf(docs.size()));
                 if (docs.isEmpty()){
                     isLastRecipePage = true;
                     listener.onRecipeLoaded(new ArrayList<>());

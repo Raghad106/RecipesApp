@@ -36,6 +36,10 @@ public class RecipeViewModel extends ViewModel {
         repository.getAllRecipes(listener);
     }
 
+    public void getAllRecipesPaginated(OnFirebaseLoadedListener.OnRecipesLoaded listener, boolean isInitial){
+        repository.getAllRecipesPaginated(listener, isInitial);
+    }
+
     public void getRecipesByCategoryName(String categoryId, OnFirebaseLoadedListener.OnRecipesLoaded listener){
         repository.getRecipesByCategoryName(categoryId, listener);
     }

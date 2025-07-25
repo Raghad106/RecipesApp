@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.ucas.firebaseminiprojectcomplete.data.models.Recipe;
 import com.ucas.firebaseminiprojectcomplete.data.viewmodels.ProfileViewModel;
@@ -29,30 +32,26 @@ import com.ucas.firebaseminiprojectcomplete.utilities.OnItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link RecyclerViewFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class RecyclerViewFragment extends Fragment implements OnItemListener.OnRecipeListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = "param1";
     private static final String RECIPES_TYPE = "param2";
-    private List<Recipe> originalRecipes = new ArrayList<>();
+
+    private FragmentRecyclerViewBinding binding;
+    private final List<Recipe> originalRecipes = new ArrayList<>();
     private RecipeAdapter adapter;
     private RecipeViewModel recipeViewModel;
     private ProfileViewModel profileViewModel;
     private OnItemListener.OnFragmentListener listener;
 
-    // TODO: Rename and change types of parameters
+    private boolean isLoading = false;
+    private boolean isLastPage = false;
+    private final int visibleThreshold = 3;
+
     private String tag;
     private String category;
 
-    public RecyclerViewFragment() {
-        // Required empty public constructor
-    }
+    public RecyclerViewFragment() {}
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -60,15 +59,6 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
         listener = (OnItemListener.OnFragmentListener) context;
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RecyclerViewFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static RecyclerViewFragment newInstance(String param1, String param2) {
         RecyclerViewFragment fragment = new RecyclerViewFragment();
         Bundle args = new Bundle();
@@ -77,6 +67,7 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
         fragment.setArguments(args);
         return fragment;
     }
+
     public static RecyclerViewFragment newInstance(String param1) {
         RecyclerViewFragment fragment = new RecyclerViewFragment();
         Bundle args = new Bundle();
@@ -95,35 +86,35 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        FragmentRecyclerViewBinding binding = FragmentRecyclerViewBinding.inflate(inflater, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentRecyclerViewBinding.inflate(inflater, container, false);
         recipeViewModel = new ViewModelProvider(requireActivity()).get(RecipeViewModel.class);
         profileViewModel = new ViewModelProvider(requireActivity()).get(ProfileViewModel.class);
-        if (tag != null){
-            if (tag.equals(CATEGORY_COLLECTION)){
-                if (category != null){
+
+        isLoading = false;
+        isLastPage = false;
+
+        if (tag != null) {
+            if (tag.equals(CATEGORY_COLLECTION)) {
+                if (category != null) {
                     if (category.equals("all")) {
-                        recipeViewModel.getAllRecipes(recipes -> {
-                            originalRecipes = recipes;
-                            adapter = new RecipeAdapter(RecyclerViewFragment.this, recipes);
+                        if (!originalRecipes.isEmpty() && adapter != null) {
+                            Log.d("RECYCLER_VIEW", "Reusing existing adapter.");
                             declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
-                        });
-                    }
-                    else {
+                            attachScrollListener();
+                        } else {
+                            loadPaginatedRecipes();
+                        }
+                        }  else {
                         recipeViewModel.getRecipesByCategoryName(category.toLowerCase(), recipes -> {
-                            originalRecipes = recipes;
+                            originalRecipes.clear();
+                            originalRecipes.addAll(recipes);
                             adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
-                            declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
+                            declareRecyclerView(getActivity(), adapter, binding.rvItems, false);
                         });
                     }
-
                 }
-
-            }
-
-
-            else if (tag.equals(SAVED_RECIPE_TAG)){
+            } else if (tag.equals(SAVED_RECIPE_TAG)) {
                 profileViewModel.getSavedRecipes(recipes -> {
                     declareRecyclerView(requireContext(), new RecipeAdapter(RecyclerViewFragment.this, recipes), binding.rvItems, false);
                 });
@@ -139,12 +130,13 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
 
     @Override
     public void onUserClicked(String userId) {
-        if (userId != null && !userId.isEmpty()){
+        if (userId != null && !userId.isEmpty()) {
             profileViewModel.getCurrentUserInfo(userInfo -> {
-                if (userInfo.get(ID_MAP_KEY).equals(userId))
+                if (userInfo.get(ID_MAP_KEY).equals(userId)) {
                     listener.onNavigateFragments(CURRENT_USER_TAG);
-                else
+                } else {
                     listener.onNavigateToUserProfile(USER_TAG, userId);
+                }
             });
         }
     }
@@ -157,9 +149,7 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
     }
 
     public void filterRecipes(String query) {
-        if (adapter == null || originalRecipes == null) {
-            return;
-        }
+        if (adapter == null || originalRecipes.isEmpty()) return;
 
         if (query == null || query.isEmpty()) {
             adapter.updateList(originalRecipes);
@@ -175,5 +165,66 @@ public class RecyclerViewFragment extends Fragment implements OnItemListener.OnR
         adapter.updateList(filtered);
     }
 
+    private void loadPaginatedRecipes() {
+        Log.d("PAGINATION", "loadPaginatedRecipes called");
+
+        if (isLoading || isLastPage) {
+            Log.d("PAGINATION", "Already loading or reached last page");
+            return;
+        }
+
+        isLoading = true;
+        Log.d("PAGINATION", "Loading new recipes...");
+
+        boolean isInitial = originalRecipes.isEmpty();
+        Log.d("PAGINATION", "isInitial: " + isInitial);
+
+        recipeViewModel.getAllRecipesPaginated(recipes -> {
+            Log.d("ALL_RECIPES", "Received recipes size: " + recipes.size());
+
+            if (recipes.isEmpty()) {
+                isLastPage = true;
+            }
+
+            if (adapter == null) {
+                Log.d("PAGINATION", "Adapter is null. Creating new adapter.");
+                originalRecipes.addAll(recipes);
+                adapter = new RecipeAdapter(RecyclerViewFragment.this, originalRecipes);
+                declareRecyclerView(requireActivity(), adapter, binding.rvItems, false);
+                attachScrollListener();
+            } else {
+                Log.d("PAGINATION", "Adapter exists. Appending data.");
+                int oldSize = originalRecipes.size();
+                originalRecipes.addAll(recipes);
+                adapter.notifyItemRangeInserted(oldSize, recipes.size());
+            }
+
+            isLoading = false;
+            Log.d("PAGINATION", "Loading complete.");
+        }, isInitial);
+    }
+
+    private void attachScrollListener() {
+        Log.d("PAGINATION", "ScrollListener attached");
+        binding.rvItems.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager == null) return;
+
+                int totalItemCount = layoutManager.getItemCount();
+                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+
+                Log.d("SCROLL", "Total: " + totalItemCount + ", LastVisible: " + lastVisibleItem);
+
+                if (!isLoading && totalItemCount <= (lastVisibleItem + visibleThreshold)) {
+                    Log.d("SCROLL", "End reached. Triggering pagination...");
+                    loadPaginatedRecipes();
+                }
+            }
+        });
+    }
 
 }
